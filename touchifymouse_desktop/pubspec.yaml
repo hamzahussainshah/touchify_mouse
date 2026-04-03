@@ -1,0 +1,32 @@
+name: touchifymouse_desktop
+description: TouchifyMouse desktop companion app for macOS and Windows.
+version: 1.0.0+1
+publish_to: none
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: '>=3.10.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.5.1
+  go_router: ^13.0.0
+  google_fonts: ^6.2.1
+  qr_flutter: ^4.1.0
+  bonsoir: ^5.0.0
+  tray_manager: ^0.2.0
+  window_manager: ^0.3.8
+  shared_preferences: ^2.2.2
+  path_provider: ^2.1.2
+  ffi: ^2.1.0
+  win32: ^5.2.0            # Windows only
+  just_audio: ^0.9.38
+  process_run: ^0.13.0
+  network_info_plus: ^4.1.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/icons/tray_icon.png
+    - assets/bin/
