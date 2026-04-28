@@ -73,6 +73,7 @@ class SettingsNotifier extends StateNotifier<SettingsModel> {
   void setLeftHanded(bool v)       { _set('leftHanded', v);       state = state.copyWith(leftHanded: v); }
   void setSoundOnPress(bool v)     { _set('soundOnPress', v);     state = state.copyWith(soundOnPress: v); }
   void setGyroMouse(bool v)        { _set('gyroMouse', v);        state = state.copyWith(gyroMouse: v); }
+  void setTheme(String v)          { _prefs.setString('theme', v); state = state.copyWith(theme: v); }
 
   void _set(String key, bool v) => _prefs.setBool(key, v);
 }

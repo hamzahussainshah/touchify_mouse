@@ -17,15 +17,20 @@ class DeviceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.primary.withOpacity(0.08) : AppColors.surface2,
+          color: isActive
+              ? AppColors.primary.withValues(alpha: 0.08)
+              : colors.surface2,
           border: Border.all(
-            color: isActive ? AppColors.primary.withOpacity(0.4) : AppColors.border,
+            color: isActive
+                ? AppColors.primary.withValues(alpha: 0.4)
+                : colors.border,
           ),
           borderRadius: BorderRadius.circular(18),
         ),
@@ -35,12 +40,16 @@ class DeviceCard extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: isActive ? AppColors.primary.withOpacity(0.2) : AppColors.surface3,
+                color: isActive
+                    ? AppColors.primary.withValues(alpha: 0.2)
+                    : colors.surface3,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
-                device.os.toLowerCase() == 'macos' ? Icons.apple : Icons.window,
-                color: isActive ? AppColors.primaryLight : AppColors.text1,
+                device.os.toLowerCase() == 'macos'
+                    ? Icons.apple
+                    : Icons.window,
+                color: isActive ? AppColors.primaryLight : colors.text1,
               ),
             ),
             const SizedBox(width: 12),
@@ -51,13 +60,13 @@ class DeviceCard extends StatelessWidget {
                   Text(
                     device.name,
                     style: AppTextStyles.deviceName.copyWith(
-                      color: isActive ? AppColors.primaryLight : AppColors.text1,
+                      color: isActive ? AppColors.primaryLight : colors.text1,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     '${device.os} • ${device.ipAddress}',
-                    style: AppTextStyles.deviceSub,
+                    style: AppTextStyles.deviceSub.copyWith(color: colors.text3),
                   ),
                 ],
               ),
@@ -70,8 +79,9 @@ class DeviceCard extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     margin: const EdgeInsets.only(bottom: 6),
                     decoration: BoxDecoration(
-                      color: AppColors.success.withOpacity(0.15),
-                      border: Border.all(color: AppColors.success.withOpacity(0.3)),
+                      color: AppColors.success.withValues(alpha: 0.15),
+                      border: Border.all(
+                          color: AppColors.success.withValues(alpha: 0.3)),
                       borderRadius: BorderRadius.circular(100),
                     ),
                     child: const Text(
@@ -94,7 +104,9 @@ class DeviceCard extends StatelessWidget {
                       height: 4.0 + (index * 3),
                       margin: const EdgeInsets.only(left: 2),
                       decoration: BoxDecoration(
-                        color: isBarActive ? AppColors.success : AppColors.success.withOpacity(0.5),
+                        color: isBarActive
+                            ? AppColors.success
+                            : AppColors.success.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(1),
                       ),
                     );

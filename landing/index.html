@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>TouchifyMouse — Turn your phone into a wireless trackpad</title>
+<meta name="description" content="TouchifyMouse turns your phone into a wireless trackpad, keyboard, microphone and remote speaker for your Mac or Windows PC. Free download." />
+<meta property="og:title" content="TouchifyMouse" />
+<meta property="og:description" content="Turn your phone into a wireless trackpad, keyboard, mic and speaker for your computer." />
+<meta property="og:type" content="website" />
+<meta name="theme-color" content="#0A0A0C" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%236366F1'/%3E%3Cpath d='M22 18a4 4 0 014-4h12a4 4 0 014 4v28a10 10 0 01-20 0V18z' fill='white'/%3E%3Ccircle cx='32' cy='25' r='2.5' fill='%236366F1'/%3E%3C/svg%3E" />
+
+<style>
+  /* ── Reset & base ─────────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:       #0A0A0C;
+    --surface:  #111114;
+    --surface2: #18181C;
+    --surface3: #222228;
+    --border:   rgba(255,255,255,0.10);
+    --text1:    #F8F8FF;
+    --text2:    #B0B0C8;
+    --text3:    #6B6B88;
+    --primary:  #6366F1;
+    --primary2: #818CF8;
+    --primary3: #4F46E5;
+    --success:  #34D399;
+    --maxw:     1100px;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text1);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--primary2); text-decoration: none; }
+  a:hover { color: var(--primary); }
+  .container { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+
+  /* ── Nav ──────────────────────────────────────────────────────── */
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    backdrop-filter: blur(16px);
+    background: rgba(10,10,12,0.78);
+    border-bottom: 1px solid var(--border);
+  }
+  nav .container {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 700; font-size: 17px; letter-spacing: -0.01em;
+  }
+  .logo-mark {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: linear-gradient(135deg, var(--primary2), var(--primary3));
+    display: grid; place-items: center;
+    font-size: 16px; box-shadow: 0 4px 14px rgba(99,102,241,0.4);
+  }
+  .nav-links { display: flex; gap: 28px; font-size: 14px; }
+  .nav-links a { color: var(--text2); }
+  .nav-links a:hover { color: var(--text1); }
+  .nav-cta {
+    padding: 8px 16px; border-radius: 10px;
+    background: var(--primary); color: white !important;
+    font-size: 14px; font-weight: 600;
+    transition: transform .15s, box-shadow .15s;
+  }
+  .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(99,102,241,0.45); }
+  @media (max-width: 720px) { .nav-links { display: none; } }
+
+  /* ── Hero ─────────────────────────────────────────────────────── */
+  .hero {
+    padding: 80px 0 60px;
+    position: relative; overflow: hidden;
+    text-align: center;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background:
+      radial-gradient(60% 50% at 50% 0%, rgba(99,102,241,0.18), transparent 70%),
+      radial-gradient(40% 40% at 80% 30%, rgba(129,140,248,0.10), transparent 70%);
+    pointer-events: none;
+  }
+  .hero-inner { position: relative; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 12px; border-radius: 999px;
+    background: var(--surface2); border: 1px solid var(--border);
+    font-size: 12px; color: var(--text2);
+    margin-bottom: 24px;
+  }
+  .pill .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--success); box-shadow: 0 0 8px var(--success);
+  }
+  h1 {
+    font-size: clamp(36px, 6vw, 60px);
+    line-height: 1.05; letter-spacing: -0.02em; font-weight: 800;
+    margin-bottom: 18px;
+    background: linear-gradient(180deg, #fff 30%, #B0B0C8 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  h1 .accent {
+    background: linear-gradient(135deg, var(--primary2), var(--primary));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .lead {
+    font-size: 18px; color: var(--text2);
+    max-width: 620px; margin: 0 auto 36px;
+  }
+
+  /* Featured download — like app store CTAs */
+  .download-row {
+    display: flex; flex-wrap: wrap; gap: 12px; justify-content: center;
+    margin-bottom: 14px;
+  }
+  .dl-btn {
+    display: inline-flex; align-items: center; gap: 12px;
+    padding: 14px 22px; border-radius: 14px;
+    background: white; color: #0A0A0C !important;
+    font-weight: 600; font-size: 15px;
+    transition: transform .15s, box-shadow .15s;
+    border: 1px solid rgba(255,255,255,0.9);
+    min-width: 200px;
+  }
+  .dl-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(255,255,255,0.15);
+  }
+  .dl-btn.secondary {
+    background: var(--surface2); color: var(--text1) !important;
+    border: 1px solid var(--border);
+  }
+  .dl-btn.secondary:hover { box-shadow: 0 12px 32px rgba(99,102,241,0.25); }
+  .dl-btn .icn { font-size: 26px; line-height: 1; }
+  .dl-btn .small { display:block; font-size: 11px; font-weight: 500; opacity: 0.7; }
+  .dl-btn .big   { display:block; font-size: 15px; font-weight: 700; }
+  .dl-meta { color: var(--text3); font-size: 13px; }
+  .mobile-cta { margin-top: 20px; }
+  .mobile-cta a { color: var(--text2); font-size: 13px; border-bottom: 1px dashed var(--text3); padding-bottom: 1px; }
+
+  /* Hero preview frame */
+  .hero-preview {
+    margin: 56px auto 0; max-width: 880px;
+    border-radius: 18px; overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    aspect-ratio: 16/9;
+    display: grid; place-items: center;
+    color: var(--text3); font-size: 13px;
+    background-image:
+      linear-gradient(135deg, rgba(99,102,241,0.08), transparent 50%),
+      repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0 2px, transparent 2px 8px);
+  }
+
+  /* ── Sections ─────────────────────────────────────────────────── */
+  section { padding: 80px 0; }
+  .section-label {
+    color: var(--primary2); font-size: 12px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  h2 {
+    font-size: clamp(28px, 4vw, 40px);
+    line-height: 1.15; letter-spacing: -0.02em; font-weight: 700;
+    margin-bottom: 16px;
+  }
+  .section-lead { color: var(--text2); font-size: 17px; max-width: 640px; }
+  .section-head { text-align: center; margin: 0 auto 56px; }
+  .section-head .section-lead { margin: 0 auto; }
+
+  /* ── Feature grid ─────────────────────────────────────────────── */
+  .features {
+    display: grid; gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  }
+  .feature {
+    padding: 28px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    transition: transform .2s, border-color .2s;
+  }
+  .feature:hover { transform: translateY(-4px); border-color: rgba(99,102,241,0.4); }
+  .feature .ico {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: rgba(99,102,241,0.15);
+    color: var(--primary2);
+    display: grid; place-items: center;
+    font-size: 22px; margin-bottom: 16px;
+  }
+  .feature h3 { font-size: 17px; margin-bottom: 6px; }
+  .feature p { color: var(--text2); font-size: 14px; }
+
+  /* ── How to use steps ─────────────────────────────────────────── */
+  .steps {
+    display: grid; gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    counter-reset: step;
+  }
+  .step {
+    padding: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    position: relative;
+    counter-increment: step;
+  }
+  .step::before {
+    content: counter(step);
+    position: absolute; top: 18px; right: 20px;
+    font-size: 38px; font-weight: 800;
+    background: linear-gradient(180deg, var(--primary2), var(--primary3));
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    opacity: 0.45;
+  }
+  .step h3 { font-size: 16px; margin-bottom: 6px; }
+  .step p { color: var(--text2); font-size: 14px; }
+
+  /* ── Requirements ─────────────────────────────────────────────── */
+  .req-grid {
+    display: grid; gap: 14px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+  .req {
+    padding: 20px 22px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .req .ico { font-size: 24px; }
+  .req strong { display: block; font-size: 14px; }
+  .req span   { display: block; color: var(--text3); font-size: 12px; }
+
+  /* ── FAQ ──────────────────────────────────────────────────────── */
+  .faq { max-width: 760px; margin: 0 auto; }
+  details {
+    border-top: 1px solid var(--border);
+    padding: 18px 0;
+  }
+  details:last-child { border-bottom: 1px solid var(--border); }
+  summary {
+    list-style: none; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: center;
+    font-weight: 600; font-size: 16px;
+  }
+  summary::-webkit-details-marker { display: none; }
+  summary::after {
+    content: '+'; font-size: 22px; color: var(--text3);
+    transition: transform .2s;
+  }
+  details[open] summary::after { content: '−'; }
+  details p { color: var(--text2); margin-top: 10px; font-size: 15px; }
+
+  /* ── CTA ──────────────────────────────────────────────────────── */
+  .cta {
+    text-align: center;
+    background: linear-gradient(135deg, rgba(99,102,241,0.18), rgba(79,70,229,0.10));
+    border: 1px solid rgba(99,102,241,0.35);
+    border-radius: 22px;
+    padding: 48px 24px;
+    margin: 40px 0;
+  }
+  .cta h2 { margin-bottom: 12px; }
+  .cta p  { color: var(--text2); margin-bottom: 24px; }
+
+  /* ── Footer ───────────────────────────────────────────────────── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 40px 0;
+    color: var(--text3); font-size: 13px;
+  }
+  footer .container {
+    display: flex; flex-wrap: wrap; gap: 16px;
+    justify-content: space-between; align-items: center;
+  }
+  footer a { color: var(--text2); margin-left: 18px; }
+  footer a:hover { color: var(--text1); }
+</style>
+</head>
+<body>
+
+<!-- ── Nav ──────────────────────────────────────────────────────── -->
+<nav>
+  <div class="container">
+    <a href="#top" class="logo">
+      <span class="logo-mark">🖱️</span>
+      TouchifyMouse
+    </a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <a href="#download" class="nav-cta">Download</a>
+  </div>
+</nav>
+
+<!-- ── Hero ─────────────────────────────────────────────────────── -->
+<header class="hero" id="top">
+  <div class="container hero-inner">
+    <span class="pill"><span class="dot"></span> Free • macOS &amp; Windows</span>
+    <h1>Your phone is now<br/>a <span class="accent">wireless trackpad</span>.</h1>
+    <p class="lead">
+      Control your Mac or Windows PC from your phone. Trackpad, keyboard, media
+      controls, microphone and remote speaker — all over your local Wi-Fi, in
+      real time.
+    </p>
+
+    <div class="download-row" id="download">
+      <a class="dl-btn" href="https://github.com/CHANGE_ME/touchifymouse-desktop/releases/latest/download/TouchifyMouse-mac.dmg">
+        <span class="icn">🍎</span>
+        <span>
+          <span class="small">Download for</span>
+          <span class="big">macOS</span>
+        </span>
+      </a>
+      <a class="dl-btn secondary" href="https://github.com/CHANGE_ME/touchifymouse-desktop/releases/latest/download/TouchifyMouse-win.zip">
+        <span class="icn">🪟</span>
+        <span>
+          <span class="small">Download for</span>
+          <span class="big">Windows</span>
+        </span>
+      </a>
+    </div>
+    <p class="dl-meta">Latest version • Free • No account required</p>
+
+    <p class="mobile-cta">
+      Get the mobile app:
+      <a href="https://play.google.com/store/apps/details?id=com.touchify_mouse">Google Play</a>
+      &nbsp;·&nbsp;
+      <a href="#">App Store (coming soon)</a>
+    </p>
+
+    <div class="hero-preview">
+      📱 → 💻 &nbsp; product screenshot goes here
+    </div>
+  </div>
+</header>
+
+<!-- ── Features ─────────────────────────────────────────────────── -->
+<section id="features">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-label">Features</div>
+      <h2>Everything you need, nothing you don't.</h2>
+      <p class="section-lead">Built for speed and zero setup. Install on your computer, scan a QR from your phone, you're connected.</p>
+    </div>
+
+    <div class="features">
+      <div class="feature">
+        <div class="ico">👆</div>
+        <h3>Smooth trackpad</h3>
+        <p>Multi-finger gestures, scroll, tap to click, and drag — with adjustable sensitivity. Sub-10ms latency on local Wi-Fi.</p>
+      </div>
+      <div class="feature">
+        <div class="ico">⌨️</div>
+        <h3>Keyboard &amp; shortcuts</h3>
+        <p>Full keyboard with modifier keys, plus quick-access shortcuts for copy, paste, undo, switch app, and more.</p>
+      </div>
+      <div class="feature">
+        <div class="ico">🎵</div>
+        <h3>Media remote</h3>
+        <p>Play, pause, skip and volume control work with Music, Spotify, YouTube, and any app that respects system media keys.</p>
+      </div>
+      <div class="feature">
+        <div class="ico">🎤</div>
+        <h3>Phone as microphone</h3>
+        <p>Stream your phone's mic into Zoom, Meet, OBS — anywhere on your computer. Useful when your laptop mic is bad.</p>
+      </div>
+      <div class="feature">
+        <div class="ico">🔊</div>
+        <h3>Remote speaker</h3>
+        <p>Send your computer's audio to your phone for private listening, or to use better headphones connected to your phone.</p>
+      </div>
+      <div class="feature">
+        <div class="ico">🔒</div>
+        <h3>Local-only</h3>
+        <p>Everything stays on your Wi-Fi. No accounts, no cloud, no telemetry. Pair with a QR code, disconnect any time.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── How it works ─────────────────────────────────────────────── -->
+<section id="how" style="background: var(--surface);">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-label">How it works</div>
+      <h2>Connected in under a minute.</h2>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <h3>Install on your computer</h3>
+        <p>Download the macOS or Windows app above and drag it to your Applications folder. The app runs quietly in your menu bar / system tray.</p>
+      </div>
+      <div class="step">
+        <h3>Get the mobile app</h3>
+        <p>Install TouchifyMouse on your phone from Google Play. Make sure your phone and computer are on the same Wi-Fi network.</p>
+      </div>
+      <div class="step">
+        <h3>Scan the QR code</h3>
+        <p>Open the desktop app — a QR code appears. Tap "Scan QR" on the mobile app and point it at the screen. Pairing is instant.</p>
+      </div>
+      <div class="step">
+        <h3>Use your phone</h3>
+        <p>Move the cursor with one finger, scroll with two, tap to click. Switch tabs at the bottom for keyboard, media, or audio modes.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Requirements ─────────────────────────────────────────────── -->
+<section>
+  <div class="container">
+    <div class="section-head">
+      <div class="section-label">Requirements</div>
+      <h2>Works with what you already have.</h2>
+    </div>
+
+    <div class="req-grid">
+      <div class="req"><span class="ico">🍎</span><div><strong>macOS 11+</strong><span>Apple Silicon &amp; Intel</span></div></div>
+      <div class="req"><span class="ico">🪟</span><div><strong>Windows 10 / 11</strong><span>x64</span></div></div>
+      <div class="req"><span class="ico">📱</span><div><strong>Android 8+</strong><span>iOS coming soon</span></div></div>
+      <div class="req"><span class="ico">📶</span><div><strong>Same Wi-Fi network</strong><span>Both devices</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FAQ ──────────────────────────────────────────────────────── -->
+<section id="faq" style="background: var(--surface);">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-label">FAQ</div>
+      <h2>Common questions.</h2>
+    </div>
+
+    <div class="faq">
+      <details open>
+        <summary>Does it cost anything?</summary>
+        <p>The core app is free. Pro features (gyro mouse, custom workflows) are an optional one-time in-app purchase.</p>
+      </details>
+      <details>
+        <summary>Does my data leave my network?</summary>
+        <p>No. The phone and the computer talk directly over your local Wi-Fi. Trackpad input, keystrokes, and audio never touch our servers — we don't have any.</p>
+      </details>
+      <details>
+        <summary>Why does the desktop app need Accessibility permission on macOS?</summary>
+        <p>macOS requires Accessibility permission for any app that moves the cursor, types keystrokes, or sends media keys on your behalf. We only use it for that.</p>
+      </details>
+      <details>
+        <summary>Phone-as-mic / remote speaker doesn't produce audio. Why?</summary>
+        <p>Audio routing on macOS needs a free virtual audio driver called <a href="https://existential.audio/blackhole/">BlackHole</a>. On Windows it needs <a href="https://vb-audio.com/Cable/">VB-CABLE</a>. The desktop app prompts you to install whichever is missing.</p>
+      </details>
+      <details>
+        <summary>Can I use it over the internet, not just Wi-Fi?</summary>
+        <p>Not currently. Both devices must be on the same local network. Internet relay is something we're considering, but it would mean adding a server and we like the local-only design for now.</p>
+      </details>
+      <details>
+        <summary>Will it drain my phone battery?</summary>
+        <p>Active use is similar to watching a video — the screen is the biggest draw. The app keeps the screen awake while in trackpad mode so you can keep using it without it locking.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ── Final CTA ────────────────────────────────────────────────── -->
+<section>
+  <div class="container">
+    <div class="cta">
+      <h2>Ready to try it?</h2>
+      <p>Free download. No sign-up. Works in 60 seconds.</p>
+      <div class="download-row">
+        <a class="dl-btn" href="https://github.com/CHANGE_ME/touchifymouse-desktop/releases/latest/download/TouchifyMouse-mac.dmg">
+          <span class="icn">🍎</span>
+          <span><span class="small">Download for</span><span class="big">macOS</span></span>
+        </a>
+        <a class="dl-btn secondary" href="https://github.com/CHANGE_ME/touchifymouse-desktop/releases/latest/download/TouchifyMouse-win.zip">
+          <span class="icn">🪟</span>
+          <span><span class="small">Download for</span><span class="big">Windows</span></span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ───────────────────────────────────────────────────── -->
+<footer>
+  <div class="container">
+    <div>© <span id="year">2026</span> TouchifyMouse · Made with care.</div>
+    <div>
+      <a href="privacy.html">Privacy</a>
+      <a href="mailto:aitools.deventiatech@gmail.com">Contact</a>
+      <a href="https://github.com/CHANGE_ME/touchifymouse-desktop">GitHub</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>

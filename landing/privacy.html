@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Privacy Policy — TouchifyMouse</title>
+<meta name="description" content="TouchifyMouse privacy policy." />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%236366F1'/%3E%3C/svg%3E" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0A0A0C; --surface: #18181C;
+    --text1: #F8F8FF; --text2: #B0B0C8; --text3: #6B6B88;
+    --primary: #6366F1; --primary2: #818CF8;
+    --border: rgba(255,255,255,0.10);
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg); color: var(--text1);
+    line-height: 1.65; -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--primary2); text-decoration: none; }
+  a:hover { color: var(--primary); }
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    backdrop-filter: blur(16px);
+    background: rgba(10,10,12,0.78);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 24px;
+  }
+  nav .inner {
+    max-width: 760px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+  .logo-mark {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: linear-gradient(135deg, #818CF8, #4F46E5);
+    display: grid; place-items: center;
+    box-shadow: 0 4px 14px rgba(99,102,241,0.4);
+  }
+  main {
+    max-width: 760px; margin: 0 auto;
+    padding: 56px 24px 80px;
+  }
+  h1 {
+    font-size: 36px; font-weight: 800; letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+  .meta {
+    color: var(--text3); font-size: 14px;
+    margin-bottom: 36px; padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  h2 {
+    font-size: 20px; font-weight: 700; margin: 36px 0 12px;
+    color: var(--text1);
+  }
+  h3 {
+    font-size: 16px; font-weight: 600; margin: 24px 0 8px;
+    color: var(--text1);
+  }
+  p, li { color: var(--text2); font-size: 15px; margin-bottom: 12px; }
+  ul { padding-left: 22px; }
+  ul li { margin-bottom: 6px; }
+  strong { color: var(--text1); }
+  code {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 2px 6px;
+    font-size: 13px;
+    color: var(--text2);
+  }
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 24px; text-align: center;
+    color: var(--text3); font-size: 13px;
+  }
+  footer a { margin: 0 10px; color: var(--text2); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="inner">
+    <a class="logo" href="index.html">
+      <span class="logo-mark">🖱️</span> TouchifyMouse
+    </a>
+    <a href="index.html" style="font-size: 14px; color: var(--text2);">← Back to home</a>
+  </div>
+</nav>
+
+<main>
+  <h1>Privacy Policy</h1>
+  <div class="meta">
+    <strong>Effective:</strong> 2026-04-25 ·
+    <strong>Last updated:</strong> 2026-04-25 ·
+    <strong>Contact:</strong> <a href="mailto:aitools.deventiatech@gmail.com">aitools.deventiatech@gmail.com</a>
+  </div>
+
+  <p>This Privacy Policy describes how the TouchifyMouse mobile app handles
+  information when you use it. The app turns your phone into a wireless
+  trackpad, keyboard, microphone, and remote speaker for a desktop computer
+  running the TouchifyMouse desktop companion on the same local Wi-Fi
+  network.</p>
+
+  <h2>1. Summary</h2>
+  <ul>
+    <li>We do <strong>not</strong> run our own servers and we do <strong>not</strong> collect any personal data on servers we control.</li>
+    <li>All trackpad input, keystrokes, audio, and pairing data flow <strong>directly</strong> between your phone and your own desktop computer over your local Wi-Fi network. None of it leaves your network.</li>
+    <li>We do <strong>not</strong> sell, share, or transfer your personal information to third parties for their independent use.</li>
+  </ul>
+
+  <h2>2. Permissions and how we use them</h2>
+
+  <h3>Camera (<code>android.permission.CAMERA</code>)</h3>
+  <p>Used <strong>only</strong> to scan the pairing QR code shown by the desktop companion app. Camera frames are processed on-device by the Google ML Kit barcode scanner embedded in the app and are <strong>not stored, recorded, transmitted, or sent anywhere</strong>. The camera is only active while the QR scan sheet is open.</p>
+
+  <h3>Microphone (<code>android.permission.RECORD_AUDIO</code>)</h3>
+  <p>Used <strong>only</strong> when you explicitly enable the "Use phone as microphone" feature. Audio captured from your phone's microphone is streamed in real time over your local Wi-Fi to the paired desktop computer that you own. Audio is <strong>not</strong> recorded, persisted, or sent to any third-party server. The microphone is silent until you toggle the feature on, and stops immediately when you toggle it off or disconnect.</p>
+
+  <h3>Network</h3>
+  <p>(<code>INTERNET</code>, <code>ACCESS_WIFI_STATE</code>, <code>ACCESS_NETWORK_STATE</code>, <code>CHANGE_WIFI_MULTICAST_STATE</code>) Used to discover and connect to the desktop companion on your local Wi-Fi via mDNS (Bonjour) and to maintain the TCP/UDP connection that carries trackpad, keyboard, media, and audio data. The internet permission is also required by Google AdMob and Google Play Billing.</p>
+
+  <h2>3. Information you provide voluntarily</h2>
+  <h3>Email address (optional)</h3>
+  <p>If you tap "Email me the desktop app link" inside the app, you may type an email address. That address is sent — only when you press send — through EmailJS, a third-party transactional email service, which delivers a one-off email containing the desktop download link. The address is not stored by us, not used for marketing, and not shared with anyone else. EmailJS's data handling is governed by their own privacy policy at <a href="https://www.emailjs.com/legal/privacy-policy/">https://www.emailjs.com/legal/privacy-policy/</a>.</p>
+
+  <h2>4. Third-party services</h2>
+
+  <h3>Google AdMob</h3>
+  <p>The app displays advertisements through Google AdMob. AdMob may collect and process information such as advertising ID, IP address, coarse location (derived from IP), device type, and basic interaction events for ad delivery, frequency capping, and fraud prevention. Google's handling of this data is governed by Google's own privacy policy: <a href="https://policies.google.com/privacy">https://policies.google.com/privacy</a>.</p>
+  <p>You can reset your Android Advertising ID, opt out of personalised ads, or delete it at any time from your Android device settings under <strong>Settings → Privacy → Ads</strong>.</p>
+
+  <h3>Google Play Billing (in-app purchases)</h3>
+  <p>If you make an in-app purchase, the transaction is handled by Google Play. We receive a confirmation token from Google to unlock the purchased feature, but we do <strong>not</strong> receive or store your payment-card details. Google's handling of payment data is governed by Google's privacy policy.</p>
+
+  <h3>Google Play Services and ML Kit</h3>
+  <p>The app uses Google Play Services and Google ML Kit (for QR decoding). These are governed by Google's privacy policy.</p>
+
+  <h2>5. Data we do NOT collect</h2>
+  <ul>
+    <li>Your name, phone number, or address.</li>
+    <li>Account credentials.</li>
+    <li>Photos, videos, contacts, calendar, files, or SMS.</li>
+    <li>Precise GPS location.</li>
+    <li>Health, biometric, or financial information.</li>
+    <li>Crash logs, telemetry, or analytics on servers we control.</li>
+  </ul>
+
+  <h2>6. Data on your device</h2>
+  <p>The app stores small, non-sensitive preferences locally on your device using Android's standard <code>SharedPreferences</code> (e.g. selected theme, pointer sensitivity, last connected device). This data never leaves your phone and is removed when you uninstall the app.</p>
+
+  <h2>7. Children's privacy</h2>
+  <p>The app is not directed to children under 13 (or the equivalent minimum age in your jurisdiction). We do not knowingly collect personal information from children. If you believe a child has provided personal information, contact us and we will take steps to address it.</p>
+
+  <h2>8. Security</h2>
+  <p>Connections to your desktop companion happen over your own local Wi-Fi network. We recommend you use a trusted, password-protected Wi-Fi network. We do not use TLS for the local connection because the data never leaves the LAN; please ensure your home/office Wi-Fi is properly secured.</p>
+
+  <h2>9. Your rights</h2>
+  <p>Because we do not collect personal data on our servers, there is nothing for us to access, export, or delete on your behalf. To control AdMob and Google Play data, use your Android device settings and your Google account controls (<a href="https://myaccount.google.com">https://myaccount.google.com</a>).</p>
+  <p>To delete all app data on your device, go to <strong>Settings → Apps → TouchifyMouse → Storage → Clear Data</strong>, or simply uninstall the app.</p>
+
+  <h2>10. Changes to this policy</h2>
+  <p>We may update this policy from time to time. Material changes will be indicated by a revised "Last updated" date at the top. Continued use of the app after changes are posted constitutes acceptance of the revised policy.</p>
+
+  <h2>11. Contact</h2>
+  <p>For questions or concerns about this Privacy Policy or how the app handles data:<br/>
+  <strong>Email:</strong> <a href="mailto:aitools.deventiatech@gmail.com">aitools.deventiatech@gmail.com</a></p>
+</main>
+
+<footer>
+  © <span id="year"></span> TouchifyMouse
+  · <a href="index.html">Home</a>
+  · <a href="mailto:aitools.deventiatech@gmail.com">Contact</a>
+</footer>
+
+<script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>

@@ -3,21 +3,48 @@ import 'app_colors.dart';
 import 'app_text_styles.dart';
 
 class AppTheme {
-  static ThemeData get darkTheme {
+  // ── AMOLED dark ────────────────────────────────────────────────────────────
+  static ThemeData get amoledTheme => _build(
+    brightness: Brightness.dark,
+    scheme: AppColorScheme.amoled,
+    scaffoldBg: AppColorScheme.amoled.scaffold,
+  );
+
+  // ── Standard dark ──────────────────────────────────────────────────────────
+  static ThemeData get darkTheme => _build(
+    brightness: Brightness.dark,
+    scheme: AppColorScheme.dark,
+    scaffoldBg: AppColorScheme.dark.scaffold,
+  );
+
+  // ── Light ──────────────────────────────────────────────────────────────────
+  static ThemeData get lightTheme => _build(
+    brightness: Brightness.light,
+    scheme: AppColorScheme.light,
+    scaffoldBg: AppColorScheme.light.scaffold,
+  );
+
+  // ── Shared builder ─────────────────────────────────────────────────────────
+  static ThemeData _build({
+    required Brightness brightness,
+    required AppColorScheme scheme,
+    required Color scaffoldBg,
+  }) {
+    final isDark = brightness == Brightness.dark;
     return ThemeData(
-      brightness: Brightness.dark,
-      scaffoldBackgroundColor: AppColors.surface0,
+      brightness: brightness,
+      scaffoldBackgroundColor: scaffoldBg,
       primaryColor: AppColors.primary,
-      colorScheme: const ColorScheme.dark(
+      extensions: [scheme],
+      colorScheme: ColorScheme(
+        brightness: brightness,
         primary: AppColors.primary,
-        secondary: AppColors.primaryLight,
-        surface: AppColors.surface1,
-        background: AppColors.surface0,
-        error: AppColors.danger,
         onPrimary: Colors.white,
+        secondary: AppColors.primaryLight,
         onSecondary: Colors.white,
-        onSurface: AppColors.text1,
-        onBackground: AppColors.text1,
+        surface: scheme.surface1,
+        onSurface: scheme.text1,
+        error: AppColors.danger,
         onError: Colors.white,
       ),
       textTheme: TextTheme(
@@ -42,7 +69,7 @@ class AppTheme {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: AppColors.text3,
+          foregroundColor: isDark ? AppColors.text3 : AppColorScheme.light.text2,
           textStyle: AppTextStyles.buttonGhost,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
@@ -52,10 +79,10 @@ class AppTheme {
       ),
       useMaterial3: true,
       appBarTheme: AppBarTheme(
-        backgroundColor: AppColors.surface0,
+        backgroundColor: scheme.surface0,
         elevation: 0,
-        titleTextStyle: AppTextStyles.navTitle,
-        iconTheme: const IconThemeData(color: AppColors.text1),
+        titleTextStyle: AppTextStyles.navTitle.copyWith(color: scheme.text1),
+        iconTheme: IconThemeData(color: scheme.text1),
       ),
     );
   }

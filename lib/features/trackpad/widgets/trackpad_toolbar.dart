@@ -15,50 +15,75 @@ class TrackpadToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-      decoration: const BoxDecoration(
-        border: Border(top: BorderSide(color: AppColors.border)),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
+      decoration: BoxDecoration(
+        color: colors.surface0,
+        border: Border(top: BorderSide(color: colors.border)),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildToolBtn(ToolbarTab.menu, Icons.menu, 'MENU'),
-          _buildToolBtn(ToolbarTab.pad, Icons.touch_app, 'PAD'),
-          _buildToolBtn(ToolbarTab.keys, Icons.keyboard, 'KEYS'),
-          _buildToolBtn(ToolbarTab.media, Icons.play_circle_outline, 'MEDIA'),
-          _buildToolBtn(ToolbarTab.audio, Icons.mic_none, 'AUDIO'),
-        ],
+      child: SafeArea(
+        top: false,
+        child: Row(
+          children: [
+            _buildToolBtn(context, ToolbarTab.menu,  Icons.menu,                'MENU'),
+            _buildToolBtn(context, ToolbarTab.pad,   Icons.touch_app,           'PAD'),
+            _buildToolBtn(context, ToolbarTab.keys,  Icons.keyboard,            'KEYS'),
+            _buildToolBtn(context, ToolbarTab.media, Icons.play_circle_outline, 'MEDIA'),
+            _buildToolBtn(context, ToolbarTab.audio, Icons.mic_none,            'AUDIO'),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildToolBtn(ToolbarTab tab, IconData icon, String label) {
+  Widget _buildToolBtn(
+      BuildContext context, ToolbarTab tab, IconData icon, String label) {
     final isActive = currentTab == tab;
-    return GestureDetector(
-      onTap: () => onTabChanged(tab),
-      child: Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          color: isActive ? AppColors.primary.withOpacity(0.2) : Colors.transparent,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 20, color: isActive ? AppColors.primaryLight : AppColors.text3),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 9,
-                fontWeight: FontWeight.w600,
-                color: isActive ? AppColors.primaryDim : AppColors.text3,
-                letterSpacing: 0.04,
+    final colors = context.appColors;
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => onTabChanged(tab),
+            borderRadius: BorderRadius.circular(14),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              height: 62,
+              decoration: BoxDecoration(
+                color: isActive
+                    ? AppColors.primary.withValues(alpha: 0.18)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: isActive
+                      ? AppColors.primary.withValues(alpha: 0.55)
+                      : Colors.transparent,
+                  width: 1,
+                ),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(icon,
+                      size: 24,
+                      color: isActive ? AppColors.primaryLight : colors.text2),
+                  const SizedBox(height: 4),
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: isActive ? AppColors.primaryLight : colors.text3,
+                      letterSpacing: 0.6,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );

@@ -6,6 +6,14 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../shared/widgets/app_toggle.dart';
 import '../../../shared/widgets/home_indicator.dart';
 import '../../../core/providers/settings_provider.dart';
+import '../../desktop_invite/widgets/get_desktop_sheet.dart';
+
+// Theme options shown in the picker
+const _kThemes = [
+  ('amoled', 'AMOLED', Icons.brightness_1),
+  ('dark',   'Dark',   Icons.brightness_3),
+  ('light',  'Light',  Icons.brightness_5),
+];
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -77,7 +85,7 @@ class SettingsScreen extends ConsumerWidget {
                 // Account
                 Text('ACCOUNT', style: AppTextStyles.sectionLabel),
                 const SizedBox(height: 12),
-                _buildListTile(
+                _buildListTile(context,
                   icon: Icons.g_mobiledata,
                   title: 'Sign in with Google',
                   onTap: () {},
@@ -92,22 +100,24 @@ class SettingsScreen extends ConsumerWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Column(
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Invert Scroll Direction', style: TextStyle(color: AppColors.text1, fontSize: 15)),
-                          SizedBox(height: 4),
-                          Text('Natural scrolling (Mac-style)', style: TextStyle(color: AppColors.text3, fontSize: 13)),
+                          Text('Invert Scroll Direction',
+                              style: TextStyle(color: context.appColors.text1, fontSize: 15)),
+                          const SizedBox(height: 4),
+                          Text('Natural scrolling (Mac-style)',
+                              style: TextStyle(color: context.appColors.text3, fontSize: 13)),
                         ],
                       ),
                       AppToggle(value: settings.invertScroll, onChanged: notifier.setInvertScroll),
                     ],
                   ),
                 ),
-                _buildToggleTile('Click Buttons', settings.showClickButtons, notifier.setShowClickButtons),
-                _buildToggleTile('Haptic Feedback', settings.hapticFeedback, notifier.setHapticFeedback),
-                _buildToggleTile('Gyro Mouse (Pro)', settings.gyroMouse, notifier.setGyroMouse),
-                
+                _buildToggleTile(context, 'Click Buttons', settings.showClickButtons, notifier.setShowClickButtons),
+                _buildToggleTile(context, 'Haptic Feedback', settings.hapticFeedback, notifier.setHapticFeedback),
+                _buildToggleTile(context, 'Gyro Mouse (Pro)', settings.gyroMouse, notifier.setGyroMouse),
+
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   child: Column(
@@ -116,16 +126,19 @@ class SettingsScreen extends ConsumerWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('Pointer Speed', style: AppTextStyles.bodyText),
-                          Text('${settings.pointerSpeed.toStringAsFixed(1)}x', style: const TextStyle(color: AppColors.primary)),
+                          Text('Pointer Speed',
+                              style: AppTextStyles.bodyText.copyWith(
+                                  color: context.appColors.text3)),
+                          Text('${settings.pointerSpeed.toStringAsFixed(1)}x',
+                              style: const TextStyle(color: AppColors.primary)),
                         ],
                       ),
                       SliderTheme(
                         data: SliderTheme.of(context).copyWith(
                           activeTrackColor: AppColors.primary,
-                          inactiveTrackColor: AppColors.surface3,
+                          inactiveTrackColor: context.appColors.surface3,
                           thumbColor: Colors.white,
-                          overlayColor: AppColors.primary.withOpacity(0.2),
+                          overlayColor: AppColors.primary.withValues(alpha: 0.2),
                           trackHeight: 4,
                         ),
                         child: Slider(
@@ -139,26 +152,89 @@ class SettingsScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
-                _buildToggleTile('Left Handed Mode', settings.leftHanded, notifier.setLeftHanded),
-                _buildToggleTile('Sound on Press', settings.soundOnPress, notifier.setSoundOnPress),
+                _buildToggleTile(context, 'Left Handed Mode', settings.leftHanded, notifier.setLeftHanded),
+                _buildToggleTile(context, 'Sound on Press', settings.soundOnPress, notifier.setSoundOnPress),
                 const SizedBox(height: 32),
 
                 // Appearance
                 Text('APPEARANCE', style: AppTextStyles.sectionLabel),
                 const SizedBox(height: 12),
-                _buildListTile(
-                  title: 'Theme',
-                  trailing: const Text('Dark (AMOLED)', style: TextStyle(color: AppColors.text3, fontSize: 13)),
-                  onTap: () {},
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Theme', style: AppTextStyles.bodyText),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: _kThemes.map(((String id, String label, IconData icon) t) {
+                          final isSelected = settings.theme == t.$1;
+                          return Expanded(
+                            child: GestureDetector(
+                              onTap: () => notifier.setTheme(t.$1),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                margin: const EdgeInsets.symmetric(horizontal: 4),
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? AppColors.primary.withValues(alpha: 0.12)
+                                      : context.appColors.surface3,
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? AppColors.primary
+                                        : context.appColors.border,
+                                    width: isSelected ? 1.5 : 1,
+                                  ),
+                                ),
+                                child: Column(
+                                  children: [
+                                    Icon(t.$3,
+                                        size: 22,
+                                        color: isSelected
+                                            ? AppColors.primaryLight
+                                            : context.appColors.text3),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      t.$2,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: isSelected
+                                            ? AppColors.primaryLight
+                                            : context.appColors.text3,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 32),
-                
+
+                // Desktop app
+                Text('DESKTOP APP', style: AppTextStyles.sectionLabel),
+                const SizedBox(height: 12),
+                _buildListTile(
+                  context,
+                  icon: Icons.desktop_mac,
+                  title: 'Get the desktop app',
+                  onTap: () => GetDesktopSheet.show(context),
+                ),
+                const SizedBox(height: 32),
+
                 // About
                 Text('ABOUT', style: AppTextStyles.sectionLabel),
                 const SizedBox(height: 12),
-                _buildListTile(title: 'Version 1.0.0', onTap: null),
-                _buildListTile(title: 'Privacy Policy', onTap: () {}),
-                _buildListTile(title: 'Terms of Service', onTap: () {}),
+                _buildListTile(context, title: 'Version 1.0.0', onTap: null),
+                _buildListTile(context, title: 'Privacy Policy', onTap: () {}),
+                _buildListTile(context, title: 'Terms of Service', onTap: () {}),
                 const SizedBox(height: 40),
               ],
             ),
@@ -169,7 +245,14 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildListTile({IconData? icon, required String title, Widget? trailing, VoidCallback? onTap}) {
+  Widget _buildListTile(
+      BuildContext context, {
+      IconData? icon,
+      required String title,
+      Widget? trailing,
+      VoidCallback? onTap,
+  }) {
+    final c = context.appColors;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
@@ -178,26 +261,31 @@ class SettingsScreen extends ConsumerWidget {
         child: Row(
           children: [
             if (icon != null) ...[
-              Icon(icon, color: AppColors.text2, size: 24),
+              Icon(icon, color: c.text2, size: 24),
               const SizedBox(width: 16),
             ],
-            Expanded(child: Text(title, style: AppTextStyles.bodyText)),
+            Expanded(
+                child: Text(title,
+                    style: AppTextStyles.bodyText.copyWith(color: c.text3))),
             if (trailing != null) trailing,
             if (trailing == null && onTap != null)
-              const Icon(Icons.arrow_forward_ios, color: AppColors.text3, size: 14),
+              Icon(Icons.arrow_forward_ios, color: c.text3, size: 14),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildToggleTile(String title, bool value, ValueChanged<bool> onChanged) {
+  Widget _buildToggleTile(
+      BuildContext context, String title, bool value, ValueChanged<bool> onChanged) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(title, style: AppTextStyles.bodyText),
+          Text(title,
+              style: AppTextStyles.bodyText
+                  .copyWith(color: context.appColors.text3)),
           AppToggle(value: value, onChanged: onChanged),
         ],
       ),

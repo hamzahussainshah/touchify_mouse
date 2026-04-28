@@ -14,13 +14,13 @@ class ConnectionNotifier extends StateNotifier<AppConnectionState> {
   DeviceModel? get connectedDevice => _connectedDevice;
 
   Future<void> connect(DeviceModel device) async {
-    state = state.copyWith(status: ConnectionStatus.connecting, errorMessage: null);
-    
-    await Future.delayed(const Duration(milliseconds: 300));
-    
+    // Set _connectedDevice IMMEDIATELY so TrackpadScreen.addPostFrameCallback
+    // (which fires ~10 ms after navigation) always reads a non-null device.
+    // The previous code set it only after a 300 ms delay, causing the screen
+    // to read null and bounce back to /connect on the first attempt.
     _connectedDevice = device;
     state = state.copyWith(
-      status: ConnectionStatus.connected, 
+      status: ConnectionStatus.connected,
       deviceId: device.id,
       deviceIp: device.ipAddress,
     );

@@ -18,10 +18,93 @@ class MicrophoneScreen extends ConsumerStatefulWidget {
 
 class _MicrophoneScreenState extends ConsumerState<MicrophoneScreen> {
   int _selectedQuality = 1; // 0=16k, 1=44k, 2=48k
-  bool _micEnabled = false;
   bool noiseCancellation = true;
   bool echoCancellation = true;
   bool voiceFocus = false;
+
+  String? _installMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.listenManual(micSetupRequiredProvider, (_, next) {
+        next.whenData((_) => _showSetupBanner());
+      });
+      ref.listenManual(micInstallProgressProvider, (_, next) {
+        next.whenData((msg) {
+          if (mounted) setState(() => _installMessage = msg);
+        });
+      });
+    });
+  }
+
+  void _showSetupBanner() {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showMaterialBanner(
+      MaterialBanner(
+        backgroundColor: const Color(0xFF0A1F2D),
+        leading: const Icon(Icons.warning_amber_rounded,
+            color: Color(0xFF4FC3F7)),
+        content: const Text(
+          'Virtual audio device not found.\n'
+          'Install BlackHole (Mac) or VB-Cable (Windows) to route mic.',
+          style: TextStyle(color: Color(0xFF80D8FF), fontSize: 13),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              ScaffoldMessenger.of(context).hideCurrentMaterialBanner();
+              _showSetupDialog();
+            },
+            child: const Text('How to set up',
+                style: TextStyle(color: Color(0xFF4FC3F7))),
+          ),
+          TextButton(
+            onPressed: () =>
+                ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+            child: const Text('Dismiss',
+                style: TextStyle(color: Color(0xFF9E9E9E))),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSetupDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: AppColors.surface2,
+        title: const Text('Virtual Mic Setup',
+            style: TextStyle(color: AppColors.text1)),
+        content: const SingleChildScrollView(
+          child: Text(
+            'Your phone mic can replace your laptop mic in\n'
+            'Zoom, Teams, Discord, etc.\n\n'
+            'macOS (free):\n'
+            '  1. brew install blackhole-2ch\n'
+            '  2. In Zoom/Teams → Settings → Audio\n'
+            '     → Microphone → select BlackHole 2ch\n\n'
+            'Windows (free):\n'
+            '  1. Download VB-Audio Virtual Cable from\n'
+            '     vb-audio.com/Cable\n'
+            '  2. In Zoom/Teams → Settings → Audio\n'
+            '     → Microphone → select CABLE Output\n\n'
+            'After setup, tap the mic button again.',
+            style: TextStyle(
+                color: AppColors.text2, fontSize: 13, height: 1.5),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Got it'),
+          ),
+        ],
+      ),
+    );
+  }
 
   int _qualityToSampleRate(int q) {
     if (q == 0) return 16000;
@@ -31,23 +114,25 @@ class _MicrophoneScreenState extends ConsumerState<MicrophoneScreen> {
 
   Future<void> _toggleMic(bool isCurrentlyRecording) async {
     if (isCurrentlyRecording) {
-      await MicStreamService.instance.stop();
-      setState(() => _micEnabled = false);
+      // Use notifier so micStreamProvider state becomes false and UI updates
+      ref.read(micStreamProvider.notifier).stopStreaming();
     } else {
       if (!TrackpadSocketService.instance.isConnected) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Not connected to desktop')));
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Not connected to desktop')));
+        }
         return;
       }
-      final ok = await MicStreamService.instance.start(
+      // Use notifier so micStreamProvider state becomes true and UI updates
+      final ok = await ref.read(micStreamProvider.notifier).startStreaming(
+        null,
         sampleRate: _qualityToSampleRate(_selectedQuality),
       );
       if (!ok && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Mic failed — check permissions or connection')));
-        return;
       }
-      if (mounted) setState(() => _micEnabled = ok);
     }
   }
 
@@ -80,14 +165,21 @@ class _MicrophoneScreenState extends ConsumerState<MicrophoneScreen> {
                         height: 180,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: isRecording ? AppColors.primary.withOpacity(0.1) : AppColors.surface2,
+                          color: isRecording
+                              ? AppColors.primary.withValues(alpha: 0.1)
+                              : context.appColors.surface2,
                           border: Border.all(
-                            color: isRecording ? AppColors.primary : AppColors.border,
+                            color: isRecording
+                                ? AppColors.primary
+                                : context.appColors.border,
                             width: 2,
                           ),
-                          boxShadow: isRecording ? const [
-                            BoxShadow(color: AppColors.primaryGlow, blurRadius: 40, spreadRadius: 10),
-                          ] : null,
+                          boxShadow: isRecording
+                              ? const [BoxShadow(
+                                  color: AppColors.primaryGlow,
+                                  blurRadius: 40,
+                                  spreadRadius: 10)]
+                              : null,
                         ),
                         child: Icon(
                           Icons.mic,
@@ -98,6 +190,40 @@ class _MicrophoneScreenState extends ConsumerState<MicrophoneScreen> {
                     ),
                   ),
                   const SizedBox(height: 32),
+                  // Install-progress banner (shown while agent auto-installs driver)
+                  if (_installMessage != null)
+                    Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0D2137),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                            color: const Color(0xFF4FC3F7), width: 1),
+                      ),
+                      child: Row(
+                        children: [
+                          const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Color(0xFF4FC3F7),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              _installMessage!,
+                              style: const TextStyle(
+                                  color: Color(0xFF80D8FF), fontSize: 13),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   WaveformVisualizer(
                     isRecording: isRecording,
                     color: AppColors.primaryLight,
@@ -155,8 +281,11 @@ class _MicrophoneScreenState extends ConsumerState<MicrophoneScreen> {
           margin: const EdgeInsets.symmetric(horizontal: 4),
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.primary.withOpacity(0.1) : AppColors.surface2,
-            border: Border.all(color: isSelected ? AppColors.primary : AppColors.border),
+            color: isSelected
+                ? AppColors.primary.withValues(alpha: 0.1)
+                : context.appColors.surface2,
+            border: Border.all(
+                color: isSelected ? AppColors.primary : context.appColors.border),
             borderRadius: BorderRadius.circular(10),
           ),
           alignment: Alignment.center,

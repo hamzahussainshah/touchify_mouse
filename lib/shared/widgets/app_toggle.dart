@@ -5,14 +5,11 @@ class AppToggle extends StatelessWidget {
   final bool value;
   final ValueChanged<bool> onChanged;
 
-  const AppToggle({
-    super.key,
-    required this.value,
-    required this.onChanged,
-  });
+  const AppToggle({super.key, required this.value, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return GestureDetector(
       onTap: () => onChanged(!value),
       child: AnimatedContainer(
@@ -20,10 +17,12 @@ class AppToggle extends StatelessWidget {
         width: 44,
         height: 24,
         decoration: BoxDecoration(
-          color: value ? AppColors.primary : AppColors.surface3,
+          color: value ? AppColors.primary : colors.surface3,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: value ? AppColors.primaryLight.withOpacity(0.5) : AppColors.border,
+            color: value
+                ? AppColors.primaryLight.withValues(alpha: 0.5)
+                : colors.border,
           ),
         ),
         child: AnimatedAlign(

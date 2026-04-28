@@ -1,0 +1,14 @@
+# Copy this file to android/key.properties and fill in real values.
+# DO NOT commit the real key.properties or the .jks file — both are gitignored.
+#
+# Generate the keystore once with:
+#   keytool -genkey -v -keystore ~/touchifymouse-upload.jks \
+#           -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+#
+# Then fill this file in (use an absolute path for storeFile so it works from
+# any Gradle invocation).
+
+storePassword=CHANGE_ME
+keyPassword=CHANGE_ME
+keyAlias=upload
+storeFile=/absolute/path/to/touchifymouse-upload.jks

@@ -1,6 +1,7 @@
+import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'dart:convert';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../trackpad/services/trackpad_socket_service.dart';
@@ -18,6 +19,18 @@ class _MediaRemotePanelState extends ConsumerState<MediaRemotePanel> {
   bool _isRepeat = false;
   bool _isPlaying = false;
 
+  // Debounce: hold the latest value and send only after 80 ms of inactivity.
+  // Without this, dragging the slider floods the server with 30-50 commands/s;
+  // on macOS each spawns an osascript process and they finish in random order.
+  Timer? _volumeDebounce;
+  double _pendingVolume = 0.5;
+
+  @override
+  void dispose() {
+    _volumeDebounce?.cancel();
+    super.dispose();
+  }
+
   void _send(Map<String, dynamic> cmd) {
     TrackpadSocketService.instance.sendRaw(jsonEncode(cmd));
   }
@@ -26,9 +39,9 @@ class _MediaRemotePanelState extends ConsumerState<MediaRemotePanel> {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(24),
-      decoration: const BoxDecoration(
-        color: AppColors.surface1,
-        border: Border(top: BorderSide(color: AppColors.border)),
+      decoration: BoxDecoration(
+        color: context.appColors.surface1,
+        border: Border(top: BorderSide(color: context.appColors.border)),
       ),
       child: Column(
         children: [
@@ -36,9 +49,9 @@ class _MediaRemotePanelState extends ConsumerState<MediaRemotePanel> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppColors.surface2,
+              color: context.appColors.surface2,
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: AppColors.border),
+              border: Border.all(color: context.appColors.border),
             ),
             child: Row(
               children: [
@@ -46,10 +59,10 @@ class _MediaRemotePanelState extends ConsumerState<MediaRemotePanel> {
                   width: 50,
                   height: 50,
                   decoration: BoxDecoration(
-                    color: AppColors.surface4,
+                    color: context.appColors.surface4,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.music_note, color: AppColors.primaryDim),
+                  child: Icon(Icons.music_note, color: context.appColors.text3),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -58,7 +71,8 @@ class _MediaRemotePanelState extends ConsumerState<MediaRemotePanel> {
                     children: [
                       Text('Desktop Media', style: AppTextStyles.deviceName),
                       const SizedBox(height: 2),
-                      Text(_isPlaying ? 'Playing' : 'Paused', style: AppTextStyles.deviceSub),
+                      Text(_isPlaying ? 'Playing' : 'Paused',
+                          style: AppTextStyles.deviceSub.copyWith(color: context.appColors.text3)),
                     ],
                   ),
                 ),
@@ -137,27 +151,38 @@ class _MediaRemotePanelState extends ConsumerState<MediaRemotePanel> {
             children: [
               GestureDetector(
                 onTap: () => _send({"type": "media", "action": "mute"}),
-                child: const Icon(Icons.volume_down, color: AppColors.text3),
+                child: Icon(Icons.volume_down, color: context.appColors.text3),
               ),
               Expanded(
                 child: SliderTheme(
                   data: SliderTheme.of(context).copyWith(
                     activeTrackColor: AppColors.primary,
-                    inactiveTrackColor: AppColors.surface3,
+                    inactiveTrackColor: context.appColors.surface3,
                     thumbColor: Colors.white,
-                    overlayColor: AppColors.primary.withOpacity(0.2),
+                    overlayColor: AppColors.primary.withValues(alpha: 0.2),
                     trackHeight: 4,
                   ),
                   child: Slider(
                     value: _volume,
                     onChanged: (val) {
-                      setState(() => _volume = val);
-                      _send({"type": "media", "action": "volume", "value": val});
+                      setState(() {
+                        _volume = val;
+                        _pendingVolume = val;
+                      });
+                      _volumeDebounce?.cancel();
+                      _volumeDebounce = Timer(
+                        const Duration(milliseconds: 80),
+                        () => _send({
+                          "type": "media",
+                          "action": "volume",
+                          "value": _pendingVolume,
+                        }),
+                      );
                     },
                   ),
                 ),
               ),
-              const Icon(Icons.volume_up, color: AppColors.text3),
+              Icon(Icons.volume_up, color: context.appColors.text3),
             ],
           ),
         ],
@@ -174,7 +199,7 @@ class _MediaBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => IconButton(
-        icon: Icon(icon, color: AppColors.text1, size: size),
+        icon: Icon(icon, color: context.appColors.text1, size: size),
         onPressed: onTap,
         padding: EdgeInsets.zero,
       );
@@ -185,12 +210,17 @@ class _IconToggleBtn extends StatelessWidget {
   final bool active;
   final double size;
   final VoidCallback onTap;
-  const _IconToggleBtn({required this.icon, required this.active, required this.size, required this.onTap});
+  const _IconToggleBtn(
+      {required this.icon,
+      required this.active,
+      required this.size,
+      required this.onTap});
 
   @override
   Widget build(BuildContext context) => IconButton(
-        icon: Icon(icon, size: size,
-            color: active ? AppColors.primaryLight : AppColors.text3),
+        icon: Icon(icon,
+            size: size,
+            color: active ? AppColors.primaryLight : context.appColors.text3),
         onPressed: onTap,
         padding: EdgeInsets.zero,
       );

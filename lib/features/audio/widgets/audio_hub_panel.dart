@@ -15,13 +15,16 @@ class AudioHubPanel extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isMicActive     = ref.watch(micStreamProvider);
     final isSpeakerActive = ref.watch(speakerStreamProvider);
-    // Reactive: true as soon as TCP socket connects
-    final isConnected     = ref.watch(isSocketConnectedProvider).valueOrNull ?? false;
+    // StreamProvider emits current state immediately (see connection_state_provider.dart),
+    // so valueOrNull is non-null as soon as the widget is first built.
+    // Fall back to the synchronous bool as an extra safety net.
+    final isConnected = ref.watch(isSocketConnectedProvider).valueOrNull
+        ?? TrackpadSocketService.instance.isConnected;
 
     return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.surface1,
-        border: Border(top: BorderSide(color: AppColors.border)),
+      decoration: BoxDecoration(
+        color: context.appColors.surface1,
+        border: Border(top: BorderSide(color: context.appColors.border)),
       ),
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -29,12 +32,12 @@ class AudioHubPanel extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: AppColors.warning.withOpacity(0.1),
+              color: AppColors.warning.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.warning.withOpacity(0.2)),
+              border: Border.all(color: AppColors.warning.withValues(alpha: 0.2)),
             ),
-            child: Row(
-              children: const [
+            child: const Row(
+              children: [
                 Icon(Icons.lightbulb_outline, color: AppColors.warning, size: 20),
                 SizedBox(width: 12),
                 Expanded(
@@ -64,10 +67,7 @@ class AudioHubPanel extends ConsumerWidget {
                           const SnackBar(content: Text('Not connected to desktop — connect first')));
                         return;
                       }
-                      final socket = TrackpadSocketService.instance.tcpSocket;
-                      if (socket != null) {
-                        ref.read(micStreamProvider.notifier).startStreaming(socket);
-                      }
+                      ref.read(micStreamProvider.notifier).startStreaming(null);
                     } else {
                       ref.read(micStreamProvider.notifier).stopStreaming();
                     }
@@ -89,10 +89,7 @@ class AudioHubPanel extends ConsumerWidget {
                           const SnackBar(content: Text('Not connected to desktop — connect first')));
                         return;
                       }
-                      final socket = TrackpadSocketService.instance.tcpSocket;
-                      if (socket != null) {
-                        ref.read(speakerStreamProvider.notifier).startReceiving(socket);
-                      }
+                      ref.read(speakerStreamProvider.notifier).startReceiving(null);
                     } else {
                       ref.read(speakerStreamProvider.notifier).stopReceiving();
                     }
@@ -117,13 +114,14 @@ class AudioHubPanel extends ConsumerWidget {
     required ValueChanged<bool> onToggle,
     required VoidCallback onTapSettings,
   }) {
+    final c = context.appColors;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: isActive ? color.withOpacity(0.08) : AppColors.surface2,
+        color: isActive ? color.withValues(alpha: 0.08) : c.surface2,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isActive ? color.withOpacity(0.4) : AppColors.border,
+          color: isActive ? color.withValues(alpha: 0.4) : c.border,
         ),
       ),
       child: Column(
@@ -134,10 +132,10 @@ class AudioHubPanel extends ConsumerWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: isActive ? color.withOpacity(0.2) : AppColors.surface3,
+                  color: isActive ? color.withValues(alpha: 0.2) : c.surface3,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(icon, color: isActive ? color : AppColors.text2),
+                child: Icon(icon, color: isActive ? color : c.text2),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -149,13 +147,13 @@ class AudioHubPanel extends ConsumerWidget {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: isActive ? color : AppColors.text1,
+                        color: isActive ? color : c.text1,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
-                      style: const TextStyle(fontSize: 13, color: AppColors.text3),
+                      style: TextStyle(fontSize: 13, color: c.text3),
                     ),
                   ],
                 ),
@@ -170,7 +168,7 @@ class AudioHubPanel extends ConsumerWidget {
                 child: Container(
                   height: 36,
                   decoration: BoxDecoration(
-                    color: AppColors.surface3,
+                    color: c.surface3,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   alignment: Alignment.center,
@@ -178,19 +176,16 @@ class AudioHubPanel extends ConsumerWidget {
                       ? Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: List.generate(
-                              5,
-                              (index) => Container(
-                                    width: 3,
-                                    height: 10.0 + (index % 3) * 5,
-                                    margin: const EdgeInsets.symmetric(horizontal: 2),
-                                    color: color,
-                                  )),
+                            5,
+                            (index) => Container(
+                              width: 3,
+                              height: 10.0 + (index % 3) * 5,
+                              margin: const EdgeInsets.symmetric(horizontal: 2),
+                              color: color,
+                            ),
+                          ),
                         )
-                      : Container(
-                          height: 2,
-                          width: 40,
-                          color: AppColors.surface4,
-                        ),
+                      : Container(height: 2, width: 40, color: c.surface4),
                 ),
               ),
               const SizedBox(width: 12),
@@ -201,10 +196,10 @@ class AudioHubPanel extends ConsumerWidget {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: AppColors.surface3,
+                    color: c.surface3,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: const Icon(Icons.settings_outlined, size: 18, color: AppColors.text2),
+                  child: Icon(Icons.settings_outlined, size: 18, color: c.text2),
                 ),
               ),
             ],

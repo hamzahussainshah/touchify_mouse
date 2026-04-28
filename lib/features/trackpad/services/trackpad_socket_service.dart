@@ -222,6 +222,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
+import '../../audio/services/speaker_stream_service.dart';
+import '../../audio/services/mic_stream_service.dart';
 
 class TrackpadSocketService {
   static final TrackpadSocketService instance =
@@ -417,8 +419,29 @@ class TrackpadSocketService {
   void _handleIncoming(String line) {
     try {
       final data = jsonDecode(line) as Map<String, dynamic>;
-      if (data['type'] == 'audio_speaker_chunk') {
-        // SpeakerStreamService.instance.handleChunk(data);
+      final type = data['type'] as String?;
+      switch (type) {
+        case 'audio_speaker_chunk':
+          SpeakerStreamService.instance.handleChunk(data);
+        case 'audio_setup_required':
+          final forDevice = data['for'] as String?;
+          if (forDevice == 'speaker') {
+            SpeakerStreamService.instance.handleSetupRequired(data);
+          } else if (forDevice == 'mic') {
+            MicStreamService.instance.handleSetupRequired(data);
+          }
+        case 'mic_status':
+          final active = data['active'] as bool? ?? false;
+          final device = data['device'] as String? ?? '';
+          debugPrint('[Socket] mic_status: active=$active device=$device');
+          if (!active) MicStreamService.instance.handleSetupRequired(data);
+        case 'audio_install_progress':
+          final msg = data['message'] as String? ?? '';
+          debugPrint('[Socket] audio_install_progress: $msg');
+          MicStreamService.instance.handleInstallProgress(msg);
+          SpeakerStreamService.instance.handleInstallProgress(msg);
+        case 'audio_devices_info':
+          debugPrint('[Socket] audio_devices_info: ${data['info']}');
       }
     } catch (_) {}
   }

@@ -7,14 +7,11 @@ import 'core/providers/settings_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Must initialize before ProviderScope so sharedPreferencesProvider override works
   final prefs = await SharedPreferences.getInstance();
 
   runApp(
     ProviderScope(
       overrides: [
-        // Override the placeholder provider with the real instance
         sharedPreferencesProvider.overrideWithValue(prefs),
       ],
       child: const TouchDeskApp(),
@@ -22,16 +19,33 @@ void main() async {
   );
 }
 
-class TouchDeskApp extends StatelessWidget {
+class TouchDeskApp extends ConsumerWidget {
   const TouchDeskApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = ref.watch(settingsProvider).theme; // 'amoled' | 'dark' | 'light'
+
+    final ThemeData activeTheme;
+    final ThemeMode themeMode;
+
+    switch (theme) {
+      case 'light':
+        activeTheme = AppTheme.lightTheme;
+        themeMode   = ThemeMode.light;
+      case 'dark':
+        activeTheme = AppTheme.darkTheme;
+        themeMode   = ThemeMode.dark;
+      default: // 'amoled'
+        activeTheme = AppTheme.amoledTheme;
+        themeMode   = ThemeMode.dark;
+    }
+
     return MaterialApp.router(
       title: 'TouchifyMouse',
-      theme: AppTheme.darkTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.dark,
+      theme: activeTheme,
+      darkTheme: activeTheme,
+      themeMode: themeMode,
       routerConfig: AppRouter.router,
       debugShowCheckedModeBanner: false,
     );

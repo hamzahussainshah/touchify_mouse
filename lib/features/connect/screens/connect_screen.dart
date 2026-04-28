@@ -159,7 +159,9 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Connect', style: AppTextStyles.navTitle),
+                  Text('Connect',
+                      style: AppTextStyles.navTitle
+                          .copyWith(color: context.appColors.text1)),
                   IconButtonSmall(
                     icon: Icons.refresh,
                     onTap: _isScanning ? () {} : () => _refreshDiscovery(),
@@ -172,11 +174,11 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
               child: devices.isEmpty
                   ? Center(
                       child: Text(
-                        _isScanning 
-                          ? 'Scanning for devices...' 
+                        _isScanning
+                          ? 'Scanning for devices...'
                           : 'No devices found.\nMake sure desktop agent is running.',
                         textAlign: TextAlign.center,
-                        style: const TextStyle(color: AppColors.text3),
+                        style: TextStyle(color: context.appColors.text3),
                       ),
                     )
                   : ListView.separated(
@@ -208,12 +210,12 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
                       controller: _ipController,
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
-                      style: const TextStyle(color: AppColors.text1),
+                      style: TextStyle(color: context.appColors.text1),
                       decoration: InputDecoration(
-                        hintText: 'Enter IP (192...  )',
-                        hintStyle: const TextStyle(color: AppColors.text3),
+                        hintText: 'Enter IP (192...)',
+                        hintStyle: TextStyle(color: context.appColors.text3),
                         filled: true,
-                        fillColor: AppColors.surface2,
+                        fillColor: context.appColors.surface2,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
@@ -246,8 +248,8 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppColors.surface2,
-                    border: Border.all(color: AppColors.border),
+                    color: context.appColors.surface2,
+                    border: Border.all(color: context.appColors.border),
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Row(
@@ -256,26 +258,26 @@ class _ConnectScreenState extends ConsumerState<ConnectScreen> {
                         width: 36,
                         height: 36,
                         decoration: BoxDecoration(
-                          color: AppColors.surface3,
+                          color: context.appColors.surface3,
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: const Icon(Icons.qr_code_scanner, color: AppColors.text1),
+                        child: Icon(Icons.qr_code_scanner, color: context.appColors.text1),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               'QR Scan to connect',
-                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.text1),
+                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: context.appColors.text1),
                             ),
                             const SizedBox(height: 2),
-                            Text('Align code inside frame', style: AppTextStyles.deviceSub),
+                            Text('Align code inside frame', style: AppTextStyles.deviceSub.copyWith(color: context.appColors.text3)),
                           ],
                         ),
                       ),
-                      const Icon(Icons.chevron_right, color: AppColors.text3),
+                      Icon(Icons.chevron_right, color: context.appColors.text3),
                     ],
                   ),
                 ),
