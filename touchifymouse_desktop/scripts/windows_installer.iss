@@ -3,9 +3,16 @@
 ;  Used by build_windows.ps1 automatically if Inno Setup is installed
 ; ─────────────────────────────────────────────────────────────
 
+; AppVersion can be overridden from the command line via Inno's /D flag,
+; e.g.  iscc /DAppVersion=1.0.1  scripts\windows_installer.iss
+; The CI workflow does this so version stays in sync with pubspec.yaml.
+#ifndef AppVersion
+  #define AppVersion "1.0.0"
+#endif
+
 #define MyAppName      "TouchifyMouse"
 #define MyAppPublisher "TouchifyMouse"
-#define MyAppURL       "https://github.com/your-repo/touchifymouse"
+#define MyAppURL       "https://github.com/hamzahussainshah/touchify_mouse"
 #define MyAppExeName   "touchifymouse_desktop.exe"
 #define BuildDir       "..\build\windows\x64\runner\Release"
 #define DistDir        "..\dist"
@@ -13,7 +20,7 @@
 [Setup]
 AppId={{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}
 AppName={#MyAppName}
-AppVersion=1.0.0
+AppVersion={#AppVersion}
 AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppName}
@@ -23,7 +30,7 @@ OutputBaseFilename=TouchifyMouse-Setup
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
-SetupIconFile=..\assets\icons\tray_icon.ico
+SetupIconFile=..\windows\runner\resources\app_icon.ico
 UninstallDisplayIcon={app}\{#MyAppExeName}
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible

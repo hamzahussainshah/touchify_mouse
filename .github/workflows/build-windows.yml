@@ -1,0 +1,127 @@
+name: Build Windows desktop
+
+# When this runs:
+#   - on every push of a tag like v1.2.3 → builds and attaches the zip
+#     AND the .exe installer to the matching GitHub Release
+#   - manually from the Actions tab via "Run workflow" → just builds and
+#     publishes both as workflow artifacts (no release required)
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: touchifymouse_desktop
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Flutter doctor (sanity check)
+        run: flutter doctor -v
+
+      - name: Pub get
+        run: flutter pub get
+
+      - name: Build Windows release
+        run: flutter build windows --release
+
+      # Stage the unpacked release dir under a stable name so the zip's
+      # internal folder is `TouchifyMouse/`, not `Release/`.
+      - name: Stage build
+        shell: pwsh
+        run: |
+          $stage = "dist\TouchifyMouse"
+          New-Item -ItemType Directory -Force -Path $stage | Out-Null
+          Copy-Item -Path "build\windows\x64\runner\Release\*" `
+                    -Destination $stage -Recurse -Force
+
+      - name: Zip portable build
+        shell: pwsh
+        run: |
+          $zip = "dist\TouchifyMouse-win.zip"
+          if (Test-Path $zip) { Remove-Item $zip -Force }
+          Compress-Archive -Path "dist\TouchifyMouse\*" `
+                           -DestinationPath $zip -Force
+          Get-Item $zip | Format-List Name, Length, LastWriteTime
+
+      # Inno Setup — pre-installed on windows-latest images, but path may
+      # vary. We probe both common locations and fall back to the zip if
+      # neither exists (so the workflow never fails on a runner refresh).
+      - name: Read version from pubspec
+        id: ver
+        shell: pwsh
+        run: |
+          $line = (Get-Content pubspec.yaml | Where-Object { $_ -match "^version:" })
+          $v = ($line -split ":")[1].Trim().Trim("'") -split "\+"
+          "version=$($v[0])" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          Write-Host "App version: $($v[0])"
+
+      - name: Build .exe installer (Inno Setup)
+        shell: pwsh
+        run: |
+          $iscc = $null
+          foreach ($p in @(
+            "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe",
+            "${env:ProgramFiles}\Inno Setup 6\ISCC.exe"
+          )) {
+            if (Test-Path $p) { $iscc = $p; break }
+          }
+          if (-not $iscc) {
+            Write-Host "Inno Setup not found — installing via Chocolatey..."
+            choco install innosetup --no-progress -y
+            $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          }
+          Write-Host "Using: $iscc"
+          & $iscc "/DAppVersion=${{ steps.ver.outputs.version }}" `
+                  "scripts\windows_installer.iss"
+          # Rename to a stable filename so /releases/latest/download/<name>
+          # always works.
+          $built = "dist\TouchifyMouse-Setup.exe"
+          $stable = "dist\TouchifyMouse-win-Setup.exe"
+          if (Test-Path $built) {
+            Move-Item -Force $built $stable
+            Get-Item $stable | Format-List Name, Length
+          } else {
+            Write-Error "Installer was not produced at $built"
+          }
+
+      - name: Upload zip artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TouchifyMouse-win-zip
+          path: touchifymouse_desktop/dist/TouchifyMouse-win.zip
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TouchifyMouse-win-installer
+          path: touchifymouse_desktop/dist/TouchifyMouse-win-Setup.exe
+          if-no-files-found: error
+          retention-days: 30
+
+      # On version-tag pushes, attach BOTH artifacts to the matching
+      # GitHub Release. Stable URLs end up at:
+      # /releases/latest/download/TouchifyMouse-win.zip
+      # /releases/latest/download/TouchifyMouse-win-Setup.exe
+      - name: Attach to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            touchifymouse_desktop/dist/TouchifyMouse-win.zip
+            touchifymouse_desktop/dist/TouchifyMouse-win-Setup.exe
+          fail_on_unmatched_files: true
