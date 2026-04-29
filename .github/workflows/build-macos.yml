@@ -1,0 +1,55 @@
+name: Build macOS desktop
+
+# When this runs:
+#   - on every push of a tag like v1.2.3 → builds and attaches the DMG
+#     to the matching GitHub Release
+#   - manually from the Actions tab via "Run workflow" → just builds and
+#     publishes the DMG as a workflow artifact (no release required)
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: touchifymouse_desktop
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Flutter doctor (sanity check)
+        run: flutter doctor -v
+
+      - name: Pub get
+        run: flutter pub get
+
+      - name: Build DMG
+        run: bash scripts/build_dmg.sh
+
+      - name: Upload DMG artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TouchifyMouse-mac-dmg
+          path: touchifymouse_desktop/dist/TouchifyMouse-mac.dmg
+          if-no-files-found: error
+          retention-days: 30
+
+      # On version-tag pushes, attach the DMG to the matching GitHub
+      # Release. Stable URL: /releases/latest/download/TouchifyMouse-mac.dmg
+      - name: Attach to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: touchifymouse_desktop/dist/TouchifyMouse-mac.dmg
+          fail_on_unmatched_files: true
