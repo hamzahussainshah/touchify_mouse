@@ -35,7 +35,15 @@ jobs:
         run: flutter pub get
 
       - name: Build DMG
-        run: bash scripts/build_dmg.sh
+        run: bash -x scripts/build_dmg.sh
+
+      - name: List dist (debug)
+        if: always()
+        run: |
+          echo "── dist/ ──"
+          ls -la dist/ || echo "(no dist dir)"
+          echo "── build/macos/Build/Products/Release/ ──"
+          ls -la build/macos/Build/Products/Release/ || echo "(no Release dir)"
 
       - name: Upload DMG artifact
         uses: actions/upload-artifact@v4
