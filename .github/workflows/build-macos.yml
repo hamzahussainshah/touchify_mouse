@@ -11,6 +11,10 @@ on:
       - 'v*'
   workflow_dispatch:
 
+# Required for softprops/action-gh-release to create/update Releases.
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: macos-latest
