@@ -15,7 +15,7 @@ Future<void> _checkInitialPermissions() async {
   if (!Platform.isMacOS) return;
   try {
     final res = await runExecutableArguments('osascript', [
-      '-e', 'tell application "System Events" to return name of processes'
+      '-e', 'tell application "System Events" to return name of processes',
     ]);
     if (res.exitCode != 0) {
       _initialRoute = '/permissions';
@@ -25,10 +25,15 @@ Future<void> _checkInitialPermissions() async {
   }
 }
 
+Future<void> _quitApp() async {
+  await pythonAgentService.stop();
+  await trayManager.destroy();
+  exit(0);
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Check accessibility BEFORE starting the app
   await _checkInitialPermissions();
 
   await windowManager.ensureInitialized();
@@ -44,45 +49,80 @@ void main() async {
   windowManager.waitUntilReadyToShow(windowOptions, () async {
     await windowManager.show();
     await windowManager.focus();
+    // Intercept the close button so the agent keeps running in the
+    // background — only the window goes away. Real quit comes from the
+    // tray menu.
+    await windowManager.setPreventClose(true);
   });
 
-  // Tray icon
+  // Tray icon (note: "Quit TouchifyMouse" rather than just "Quit" so users
+  // who reach for ⌘Q on macOS understand it kills the background agent.)
   await trayManager.setIcon('assets/icons/tray_icon.png');
-  await trayManager.setToolTip('TouchifyMouse');
-  await trayManager.setContextMenu(Menu(items: [
-    MenuItem(key: 'status',    label: 'TouchifyMouse — Running', disabled: true),
-    MenuItem(key: 'show_qr',   label: 'Show / Hide Window'),
-    MenuItem(key: 'device',    label: 'No device connected',     disabled: true),
-    MenuItem.separator(),
-    MenuItem(key: 'dashboard', label: 'Open Dashboard'),
-    MenuItem(key: 'perms',     label: 'Permissions'),
-    MenuItem.separator(),
-    MenuItem(key: 'quit',      label: 'Quit'),
-  ]));
+  await trayManager.setToolTip('TouchifyMouse — running in background');
+  await trayManager.setContextMenu(
+    Menu(
+      items: [
+        MenuItem(key: 'status', label: 'TouchifyMouse — Running', disabled: true),
+        MenuItem(key: 'device', label: 'No device connected', disabled: true),
+        MenuItem.separator(),
+        MenuItem(key: 'show', label: 'Open Dashboard'),
+        MenuItem(key: 'perms', label: 'Permissions'),
+        MenuItem.separator(),
+        MenuItem(key: 'quit', label: 'Quit TouchifyMouse'),
+      ],
+    ),
+  );
 
-  // Start the Python backend
   await pythonAgentService.start();
 
-  trayManager.addListener(TrayListenerHandler());
+  // Window + tray listeners — single object handles both so the close
+  // button and tray menu stay in sync.
+  final handler = _AppLifecycleHandler();
+  trayManager.addListener(handler);
+  windowManager.addListener(handler);
+
   runApp(ProviderScope(child: TouchifyDesktopApp(initialRoute: _initialRoute)));
 }
 
-class TrayListenerHandler with TrayListener {
+class _AppLifecycleHandler with TrayListener, WindowListener {
+  // ── Tray ────────────────────────────────────────────────────────────────
   @override
-  void onTrayMenuItemClick(MenuItem menuItem) {
-    switch (menuItem.key) {
-      case 'show_qr':
-      case 'dashboard':
-        windowManager.show();
-        break;
+  void onTrayIconMouseDown() => _showWindow();
+
+  @override
+  void onTrayIconRightMouseDown() => trayManager.popUpContextMenu();
+
+  @override
+  void onTrayMenuItemClick(MenuItem item) {
+    switch (item.key) {
+      case 'show':
+        _showWindow();
       case 'perms':
-        windowManager.show();
+        _showWindow();
         AppRouter.router.go('/permissions');
-        break;
       case 'quit':
-        pythonAgentService.stop();
-        exit(0);
+        _quitApp();
     }
+  }
+
+  // ── Window ──────────────────────────────────────────────────────────────
+  // setPreventClose(true) routes the platform close into onWindowClose
+  // instead of terminating the app. We hide the window; user can re-open
+  // from the tray. This keeps the Python agent + mDNS broadcast alive so
+  // the mobile app stays connected through window-close.
+  @override
+  void onWindowClose() async {
+    final prevented = await windowManager.isPreventClose();
+    if (prevented) {
+      await windowManager.hide();
+    }
+  }
+
+  Future<void> _showWindow() async {
+    if (!await windowManager.isVisible()) {
+      await windowManager.show();
+    }
+    await windowManager.focus();
   }
 }
 

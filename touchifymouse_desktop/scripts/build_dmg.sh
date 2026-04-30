@@ -1,50 +1,72 @@
 #!/usr/bin/env bash
-# ─────────────────────────────────────────────────────────────
-#  TouchifyMouse — macOS DMG Builder
-#  Usage:  bash scripts/build_dmg.sh
-#  Output: dist/TouchifyMouse.dmg
-# ─────────────────────────────────────────────────────────────
-set -e
+# ─────────────────────────────────────────────────────────────────────────────
+#   TouchifyMouse — macOS DMG builder
+#
+#   Output:
+#     dist/TouchifyMouse-mac.dmg              ← stable filename for hosting
+#     dist/TouchifyMouse-<version>-mac.dmg    ← versioned archive copy
+#
+#   Run from the touchifymouse_desktop/ directory:
+#     bash scripts/build_dmg.sh
+# ─────────────────────────────────────────────────────────────────────────────
+set -euo pipefail
 
 APP_NAME="TouchifyMouse"
 VERSION=$(grep '^version:' pubspec.yaml | awk '{print $2}' | tr -d "'" | cut -d'+' -f1)
-DMG_NAME="${APP_NAME}-${VERSION}-mac.dmg"
+DIST_DIR="dist"
 BUILD_DIR="build/macos/Build/Products/Release"
-# Flutter names the bundle after the project folder, not the display name
 FLUTTER_APP="touchifymouse_desktop.app"
 APP_PATH="${BUILD_DIR}/${FLUTTER_APP}"
-DIST_DIR="dist"
 
-echo "──────────────────────────────────────"
-echo "  Building ${APP_NAME} v${VERSION}"
-echo "──────────────────────────────────────"
+# We ship under a stable filename so https://.../releases/latest/download/<this>
+# always works — no need to update mobile-app constants on every release.
+DMG_STABLE="${DIST_DIR}/${APP_NAME}-mac.dmg"
+DMG_VERSIONED="${DIST_DIR}/${APP_NAME}-${VERSION}-mac.dmg"
 
-# 1. Flutter release build
+echo "──────────────────────────────────────────────"
+echo "  Building ${APP_NAME} v${VERSION} (macOS)"
+echo "──────────────────────────────────────────────"
+
+# 1. Clean prior build artifacts so the icon / asset catalog refreshes.
+echo "→ flutter clean"
+flutter clean >/dev/null
+
+# 2. Flutter release build.
 echo "→ flutter build macos --release"
 flutter build macos --release
 
-# 2. Ensure dist dir exists
-mkdir -p "${DIST_DIR}"
+if [[ ! -d "${APP_PATH}" ]]; then
+  echo "✗ Build did not produce ${APP_PATH}" >&2
+  exit 1
+fi
 
-# 3. Create a temporary staging folder for the DMG
-STAGE_DIR=$(mktemp -d)
-# Rename bundle to user-facing name inside the DMG
+# 3. Stage the .app under its user-facing name + an /Applications symlink.
+mkdir -p "${DIST_DIR}"
+STAGE_DIR="$(mktemp -d)"
+trap 'rm -rf "${STAGE_DIR}"' EXIT
+
 cp -R "${APP_PATH}" "${STAGE_DIR}/${APP_NAME}.app"
 ln -s /Applications "${STAGE_DIR}/Applications"
 
-echo "→ Creating DMG…"
+# 4. Remove any old DMGs to avoid hdiutil "exists" errors.
+rm -f "${DMG_STABLE}" "${DMG_VERSIONED}"
 
-# 4. Build the DMG with hdiutil (ships with macOS — no extra tools needed)
+echo "→ Creating DMG…"
 hdiutil create \
   -volname "${APP_NAME}" \
   -srcfolder "${STAGE_DIR}" \
   -ov \
   -format UDZO \
-  "${DIST_DIR}/${DMG_NAME}"
+  "${DMG_STABLE}" >/dev/null
 
-rm -rf "${STAGE_DIR}"
+# 5. Versioned copy for archival.
+cp "${DMG_STABLE}" "${DMG_VERSIONED}"
 
+SIZE_MB=$(du -m "${DMG_STABLE}" | awk '{print $1}')
 echo ""
-echo "✅  Done: ${DIST_DIR}/${DMG_NAME}"
+echo "✅  Built:"
+echo "    ${DMG_STABLE}            (${SIZE_MB} MB — upload this to GitHub)"
+echo "    ${DMG_VERSIONED}    (archival copy)"
 echo ""
-echo "To install: Open the DMG, drag ${APP_NAME}.app to Applications."
+echo "Next: gh release upload <tag> ${DMG_STABLE}"
+echo "      or upload via the GitHub Releases web UI."

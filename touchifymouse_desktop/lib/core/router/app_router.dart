@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/dashboard/dashboard_screen.dart';
+import '../../features/devices/devices_screen.dart';
+import '../../features/network/network_scan_screen.dart';
 import '../../features/permissions/permissions_screen.dart';
 import '../../features/settings/settings_screen.dart';
 import '../../features/onboarding/welcome_screen.dart';
@@ -94,8 +96,8 @@ class AppRouter {
       GoRoute(path: '/permissions', builder: (_, __) => const PermissionsScreen()),
       GoRoute(path: '/settings',    builder: (_, __) => const SettingsScreen()),
       GoRoute(path: '/qr',          builder: (_, __) => const _QrScreen()),
-      GoRoute(path: '/devices',     builder: (_, __) => const _PlaceholderScreen(title: 'Devices', activeRoute: '/devices')),
-      GoRoute(path: '/scan',        builder: (_, __) => const _PlaceholderScreen(title: 'Network Scan', activeRoute: '/scan')),
+      GoRoute(path: '/devices',     builder: (_, __) => const DevicesScreen()),
+      GoRoute(path: '/scan',        builder: (_, __) => const NetworkScanScreen()),
     ],
   );
 

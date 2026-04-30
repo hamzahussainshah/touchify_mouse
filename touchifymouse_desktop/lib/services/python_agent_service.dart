@@ -5,6 +5,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 
+/// Emitted by [agentPeerEvents] when the Python agent log shows a phone
+/// connecting or disconnecting. Consumed by `connected_clients_provider`.
+class AgentPeerEvent {
+  /// `'ip:port'` of the phone, e.g. `192.168.1.3:45890`.
+  final String host;
+  final bool connected;
+  const AgentPeerEvent(this.host, this.connected);
+}
+
 /// Manages the bundled Python agent subprocess.
 ///
 /// - Extracts the bundled binary from `assets/bin/touchifymouse_agent` to the
@@ -58,7 +67,10 @@ class PythonAgentService {
       proc.stdout
           .transform(utf8.decoder)
           .transform(const LineSplitter())
-          .listen((l) => debugPrint('[Agent] $l'));
+          .listen((l) {
+        debugPrint('[Agent] $l');
+        _scrapePeerEvents(l);
+      });
       proc.stderr
           .transform(utf8.decoder)
           .transform(const LineSplitter())
@@ -146,6 +158,34 @@ class PythonAgentService {
 }
 
 enum AgentStatus { starting, running, stopped, failed }
+
+// ── Peer scraping ────────────────────────────────────────────────────────────
+// Agent log format (touchifymouse_agent.py):
+//   "Phone connected from ('192.168.1.3', 45890)"
+//   "Phone disconnected: ('192.168.1.3', 45890)"
+//   "Connection closed: ('192.168.1.3', 45890)"
+final _connectedRe = RegExp(
+  r"Phone connected from \('([^']+)', (\d+)\)",
+);
+final _disconnectedRe = RegExp(
+  r"(?:Phone disconnected|Connection closed): \('([^']+)', (\d+)\)",
+);
+
+/// Public stream of peer events. UI subscribes once at startup.
+final _peerCtrl = StreamController<AgentPeerEvent>.broadcast();
+Stream<AgentPeerEvent> get agentPeerEvents => _peerCtrl.stream;
+
+void _scrapePeerEvents(String line) {
+  var m = _connectedRe.firstMatch(line);
+  if (m != null) {
+    _peerCtrl.add(AgentPeerEvent('${m.group(1)}:${m.group(2)}', true));
+    return;
+  }
+  m = _disconnectedRe.firstMatch(line);
+  if (m != null) {
+    _peerCtrl.add(AgentPeerEvent('${m.group(1)}:${m.group(2)}', false));
+  }
+}
 
 /// Backwards-compatible top-level handle referenced from main.dart.
 final pythonAgentService = PythonAgentService.instance;
