@@ -1,0 +1,62 @@
+{
+  "project_info": {
+    "project_number": "477231987563",
+    "project_id": "touchify-mouse",
+    "storage_bucket": "touchify-mouse.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:477231987563:android:badb5fc122012dd76a6a2e",
+        "android_client_info": {
+          "package_name": "com.touchify_mouse"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "477231987563-8aghm6vqep9fi53th29om0dmnaoemu7l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.touchify_mouse",
+            "certificate_hash": "44c4f25bd3581d213832c50cd5b4a99c486146ae"
+          }
+        },
+        {
+          "client_id": "477231987563-h6dtlabei76731vlcio17u5v8t0lgd07.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.touchify_mouse",
+            "certificate_hash": "b54d83edbd67a9f0721a25d5b5901a4074caf8fd"
+          }
+        },
+        {
+          "client_id": "477231987563-lvcs52edn8qgi62i55hmnkidqd6qf0r9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBKFsUCfZJqL7ZSkayas6kCfAudksPckns"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "477231987563-lvcs52edn8qgi62i55hmnkidqd6qf0r9.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "477231987563-5ts4qk2k8cis9820jt37s0q9ob35iota.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.touchifyMouse"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

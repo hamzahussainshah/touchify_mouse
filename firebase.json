@@ -1,0 +1,66 @@
+{
+  "hosting": {
+    "public": "landing",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "README.md"
+    ],
+    "cleanUrls": true,
+    "trailingSlash": false,
+    "headers": [
+      {
+        "source": "**/*.@(html)",
+        "headers": [
+          { "key": "Cache-Control", "value": "public, max-age=300, must-revalidate" }
+        ]
+      },
+      {
+        "source": "**/*.@(css|js|png|jpg|jpeg|svg|webp|woff2)",
+        "headers": [
+          { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        ]
+      }
+    ]
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "touchify-mouse",
+          "appId": "1:477231987563:android:badb5fc122012dd76a6a2e",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "touchify-mouse",
+          "appId": "1:477231987563:ios:c8bb12abe03d60c86a6a2e",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "macos": {
+        "default": {
+          "projectId": "touchify-mouse",
+          "appId": "1:477231987563:ios:c8bb12abe03d60c86a6a2e",
+          "uploadDebugSymbols": false,
+          "fileOutput": "macos/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "touchify-mouse",
+          "configurations": {
+            "android": "1:477231987563:android:badb5fc122012dd76a6a2e",
+            "ios": "1:477231987563:ios:c8bb12abe03d60c86a6a2e",
+            "macos": "1:477231987563:ios:c8bb12abe03d60c86a6a2e",
+            "web": "1:477231987563:web:638412bd19456ce46a6a2e",
+            "windows": "1:477231987563:web:43f83af695adbc3f6a6a2e"
+          }
+        }
+      }
+    }
+  }
+}

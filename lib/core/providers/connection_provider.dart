@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../features/auth/services/user_repository.dart';
 import '../../shared/models/connection_state.dart';
 import '../../shared/models/device_model.dart';
 
@@ -23,6 +26,17 @@ class ConnectionNotifier extends StateNotifier<AppConnectionState> {
       status: ConnectionStatus.connected,
       deviceId: device.id,
       deviceIp: device.ipAddress,
+    );
+
+    // Fire-and-forget: log to Firestore if the user is signed in. Failures
+    // are swallowed so a Firestore outage never blocks pairing.
+    unawaited(
+      UserRepository()
+          .logDesktopConnection(
+            uid: FirebaseAuth.instance.currentUser?.uid,
+            desktop: device,
+          )
+          .catchError((_) {}),
     );
   }
 
