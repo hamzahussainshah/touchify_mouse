@@ -1,143 +1,287 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
+import '../../../shared/widgets/brand_gradient_button.dart';
+import '../../desktop_invite/widgets/get_desktop_sheet.dart';
 
 class SetupGuideScreen extends StatelessWidget {
   const SetupGuideScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final c = context.appColors;
+
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-          onPressed: () => context.pop(),
-        ),
-        title: const Text('Setup Process'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView(
-                children: [
-                  _buildStep(
-                    number: 1,
-                    isActive: true,
-                    title: 'Download Desktop Agent',
-                    description: 'Install the companion application on your computer.',
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            _buildOsChip(Icons.apple, 'macOS'),
-                            const SizedBox(width: 10),
-                            _buildOsChip(Icons.window, 'Windows'),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        OutlinedButton.icon(
-                          onPressed: () {},
-                          icon: const Icon(Icons.mail_outline, size: 18),
-                          label: const Text('Send Link to Email'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: AppColors.text1,
-                            side: const BorderSide(color: AppColors.borderMid),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  _buildStep(
-                    number: 2,
-                    isActive: false,
-                    title: 'Connect to same Wi-Fi',
-                    description: 'Ensure both your phone and computer are on the same network.',
-                  ),
-                  _buildStep(
-                    number: 3,
-                    isActive: false,
-                    title: 'Auto-Discovery',
-                    description: 'TouchDesk will automatically find your computer on the network.',
-                    isLast: true,
-                  ),
-                ],
+      body: Stack(
+        children: [
+          // Backdrop
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [c.scaffold, c.surface0],
+                ),
               ),
             ),
-            ElevatedButton(
-              onPressed: () => context.go('/connect'),
-              child: const Center(child: Text('Next Step')),
+          ),
+          Positioned(
+            top: -120,
+            right: -100,
+            child: IgnorePointer(
+              child: Container(
+                width: 320,
+                height: 320,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      AppColors.primary.withValues(alpha: 0.25),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
+              ),
             ),
-            const SizedBox(height: 20),
-          ],
-        ),
+          ),
+
+          SafeArea(
+            child: Column(
+              children: [
+                // Header — back button + title
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 8, 16, 4),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.arrow_back_ios_new_rounded,
+                            size: 20, color: c.text1),
+                        onPressed: () => context.pop(),
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Setup',
+                              style: TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.w800,
+                                color: c.text1,
+                                letterSpacing: -0.4,
+                                height: 1.0,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Three steps to get going',
+                              style: TextStyle(fontSize: 13, color: c.text3),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Steps
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+                    children: [
+                      _StepCard(
+                        number: 1,
+                        active: true,
+                        title: 'Install the desktop app',
+                        description:
+                            'Download TouchifyMouse for your computer and open it.',
+                        body: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 14),
+                            Row(
+                              children: [
+                                _OsChip(icon: Icons.apple, label: 'macOS'),
+                                const SizedBox(width: 10),
+                                _OsChip(icon: Icons.window, label: 'Windows'),
+                              ],
+                            ),
+                            const SizedBox(height: 14),
+                            _ShareButton(
+                              onTap: () => GetDesktopSheet.show(context),
+                            ),
+                          ],
+                        ),
+                      ),
+                      _StepCard(
+                        number: 2,
+                        active: false,
+                        title: 'Same Wi-Fi network',
+                        description:
+                            'Phone and computer must be on the same network.',
+                      ),
+                      _StepCard(
+                        number: 3,
+                        active: false,
+                        title: 'Scan the QR code',
+                        description:
+                            'Tap "Connect" below, then scan the QR shown in the desktop app.',
+                        isLast: true,
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Bottom CTA
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: BrandGradientButton(
+                      label: 'Continue to Connect',
+                      icon: Icons.arrow_forward_rounded,
+                      onPressed: () => context.go('/connect'),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
+}
 
-  Widget _buildStep({required int number, required bool isActive, required String title, required String description, Widget? child, bool isLast = false}) {
+// ─────────────────────────────────────────────────────────────────────────────
+class _StepCard extends StatelessWidget {
+  final int number;
+  final bool active;
+  final String title;
+  final String description;
+  final Widget? body;
+  final bool isLast;
+
+  const _StepCard({
+    required this.number,
+    required this.active,
+    required this.title,
+    required this.description,
+    this.body,
+    this.isLast = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
     return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Column(
-            children: [
-              Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  color: isActive ? AppColors.primary : AppColors.surface2,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: isActive ? Colors.transparent : AppColors.borderMid),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  number.toString(),
-                  style: TextStyle(
-                    color: isActive ? Colors.white : AppColors.text3,
-                    fontWeight: FontWeight.bold,
+          // Step indicator + connector line
+          SizedBox(
+            width: 40,
+            child: Column(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    gradient: active ? AppColors.brandGradient : null,
+                    color: active ? null : c.surface2,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: active ? Colors.transparent : c.borderMid,
+                      width: 1,
+                    ),
+                    boxShadow: active
+                        ? [
+                            BoxShadow(
+                              color:
+                                  AppColors.primary.withValues(alpha: 0.45),
+                              blurRadius: 14,
+                              spreadRadius: -2,
+                            ),
+                          ]
+                        : null,
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    '$number',
+                    style: TextStyle(
+                      color: active ? Colors.white : c.text3,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 14,
+                    ),
                   ),
                 ),
-              ),
-              if (!isLast)
-                Expanded(
-                  child: Container(
-                    width: 2,
-                    margin: const EdgeInsets.symmetric(vertical: 4),
-                    color: AppColors.border,
+                if (!isLast)
+                  Expanded(
+                    child: Container(
+                      width: 2,
+                      margin: const EdgeInsets.symmetric(vertical: 6),
+                      decoration: BoxDecoration(
+                        color: c.border,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
                   ),
-                ),
-            ],
+              ],
+            ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 14),
+
+          // Card body
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.only(bottom: 32.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: AppTextStyles.deviceName.copyWith(
-                      color: isActive ? AppColors.text1 : AppColors.text3,
-                    ),
+              padding: EdgeInsets.only(bottom: isLast ? 0 : 18),
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(18, 16, 18, 18),
+                decoration: BoxDecoration(
+                  color: active
+                      ? c.surface1
+                      : c.surface1.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                    color: active
+                        ? AppColors.primary.withValues(alpha: 0.3)
+                        : c.border,
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    description,
-                    style: AppTextStyles.bodySub.copyWith(
-                      color: isActive ? AppColors.text2 : AppColors.text3,
+                  boxShadow: active
+                      ? [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.12),
+                            blurRadius: 20,
+                            spreadRadius: -4,
+                            offset: const Offset(0, 6),
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: active ? c.text1 : c.text2,
+                      ),
                     ),
-                  ),
-                  if (child != null) child,
-                ],
+                    const SizedBox(height: 4),
+                    Text(
+                      description,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: c.text3,
+                        height: 1.45,
+                      ),
+                    ),
+                    if (body != null) body!,
+                  ],
+                ),
               ),
             ),
           ),
@@ -145,22 +289,92 @@ class SetupGuideScreen extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildOsChip(IconData icon, String label) {
+// ─────────────────────────────────────────────────────────────────────────────
+class _OsChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  const _OsChip({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.appColors;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: AppColors.surface2,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.border),
+        gradient: LinearGradient(
+          colors: [
+            AppColors.primary.withValues(alpha: 0.18),
+            AppColors.accent.withValues(alpha: 0.12),
+          ],
+        ),
+        border: Border.all(
+          color: AppColors.primary.withValues(alpha: 0.32),
+        ),
+        borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16, color: AppColors.text1),
+          Icon(icon, size: 15, color: AppColors.primaryLight),
           const SizedBox(width: 6),
-          Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.text1)),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: c.text1,
+              letterSpacing: 0.2,
+            ),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+class _ShareButton extends StatelessWidget {
+  final VoidCallback onTap;
+  const _ShareButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.15),
+            border: Border.all(
+              color: AppColors.primary.withValues(alpha: 0.4),
+            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.ios_share_rounded,
+                size: 16,
+                color: AppColors.primaryLight,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'Share download link',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primaryLight,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

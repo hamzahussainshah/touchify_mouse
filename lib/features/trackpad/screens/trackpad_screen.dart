@@ -77,13 +77,13 @@ class _TrackpadScreenState extends ConsumerState<TrackpadScreen> {
         .connectedDevice;
 
     return Scaffold(
-      backgroundColor: AppColors.amoled,
+      backgroundColor: context.appColors.scaffold,
       body: SafeArea(
         child: Column(
           children: [
             // Topbar
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -94,14 +94,14 @@ class _TrackpadScreenState extends ConsumerState<TrackpadScreen> {
                   Row(
                     children: [
                       _buildModeBtn(Icons.mouse, true),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: 8),
                       _buildModeBtn(Icons.open_with, false),
                     ],
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
 
             // Main Content Area
             Expanded(child: _buildActivePanel()),
@@ -157,24 +157,43 @@ class _TrackpadScreenState extends ConsumerState<TrackpadScreen> {
   }
 
   Widget _buildModeBtn(IconData icon, bool isActive) {
+    final c = context.appColors;
     return Container(
-      width: 30,
-      height: 30,
+      width: 38,
+      height: 38,
       decoration: BoxDecoration(
-        color: isActive
-            ? AppColors.primary.withOpacity(0.2)
-            : AppColors.surface2,
+        gradient: isActive
+            ? LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppColors.primary.withValues(alpha: 0.25),
+                  AppColors.accent.withValues(alpha: 0.18),
+                ],
+              )
+            : null,
+        color: isActive ? null : c.surface2,
         border: Border.all(
           color: isActive
-              ? AppColors.primary.withOpacity(0.5)
-              : AppColors.border,
+              ? AppColors.primary.withValues(alpha: 0.5)
+              : c.border,
+          width: 1,
         ),
-        borderRadius: BorderRadius.circular(9),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: isActive
+            ? [
+                BoxShadow(
+                  color: AppColors.primary.withValues(alpha: 0.25),
+                  blurRadius: 12,
+                  spreadRadius: -2,
+                ),
+              ]
+            : null,
       ),
       child: Icon(
         icon,
-        size: 16,
-        color: isActive ? AppColors.primaryLight : AppColors.text3,
+        size: 18,
+        color: isActive ? AppColors.primaryLight : c.text3,
       ),
     );
   }

@@ -1,145 +1,232 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 
-class LaptopIllustration extends StatelessWidget {
+/// Stylised laptop + phone illustration shown on the welcome screen.
+/// Uses the brand palette and simulates a wireless link with a glowing arc.
+class LaptopIllustration extends StatefulWidget {
   const LaptopIllustration({super.key});
+
+  @override
+  State<LaptopIllustration> createState() => _LaptopIllustrationState();
+}
+
+class _LaptopIllustrationState extends State<LaptopIllustration>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulse =
+      AnimationController(vsync: this, duration: const Duration(milliseconds: 2200))
+        ..repeat();
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 180,
-      height: 130,
+      width: 240,
+      height: 200,
       child: Stack(
         alignment: Alignment.bottomCenter,
         children: [
-          // Laptop Body & Screen
+          // Soft ambient glow behind the whole scene
           Positioned(
             top: 0,
-            left: 10,
-            child: Container(
-              width: 160,
-              height: 95,
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0xFF2A2A3A), Color(0xFF1E1E2A)],
-                ),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(10),
-                  topRight: Radius.circular(10),
-                  bottomLeft: Radius.circular(2),
-                  bottomRight: Radius.circular(2),
-                ),
-                border: Border.all(color: Colors.white.withOpacity(0.1), width: 1.5),
-              ),
+            child: IgnorePointer(
               child: Container(
+                width: 240,
+                height: 240,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [Color(0xFF1a1a2e), Color(0xFF16213e), Color(0xFF0f3460)],
-                  ),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Center(
-                  child: Container(
-                    width: 8,
-                    height: 8,
-                    decoration: const BoxDecoration(
-                      color: AppColors.primaryLight,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primaryGlow,
-                          blurRadius: 8,
-                          spreadRadius: 2,
-                        ),
-                      ],
-                    ),
+                  shape: BoxShape.circle,
+                  gradient: RadialGradient(
+                    colors: [
+                      AppColors.primary.withValues(alpha: 0.22),
+                      Colors.transparent,
+                    ],
                   ),
                 ),
               ),
             ),
           ),
-          // Laptop Base
+
+          // ── Laptop screen ──
           Positioned(
-            bottom: 25,
+            top: 6,
             child: Container(
-              width: 180,
-              height: 10,
+              width: 200,
+              height: 124,
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0xFF2D2650), Color(0xFF1B1632)],
+                ),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  topRight: Radius.circular(12),
+                  bottomLeft: Radius.circular(2),
+                  bottomRight: Radius.circular(2),
+                ),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.12),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.2),
+                    blurRadius: 20,
+                    spreadRadius: -4,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      const Color(0xFF15102A),
+                      AppColors.primary.withValues(alpha: 0.18),
+                      const Color(0xFF231D40),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: Center(
+                  // Animated connection dot — gently breathes
+                  child: AnimatedBuilder(
+                    animation: _pulse,
+                    builder: (_, __) {
+                      final t = (1 - (_pulse.value - 0.5).abs() * 2).clamp(0.0, 1.0);
+                      return Container(
+                        width: 10,
+                        height: 10,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: AppColors.brandGradient,
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primary
+                                  .withValues(alpha: 0.5 + 0.4 * t),
+                              blurRadius: 10 + 8 * t,
+                              spreadRadius: 1 + 2 * t,
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // ── Laptop base ──
+          Positioned(
+            bottom: 36,
+            child: Container(
+              width: 220,
+              height: 11,
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Color(0xFF252535), Color(0xFF1A1A28)],
+                  colors: [Color(0xFF2D2650), Color(0xFF15102A)],
                 ),
                 borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(6),
-                  bottomRight: Radius.circular(6),
+                  bottomLeft: Radius.circular(8),
+                  bottomRight: Radius.circular(8),
                 ),
               ),
               child: Center(
                 child: Container(
-                  width: 40,
+                  width: 48,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
+                    color: Colors.white.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
               ),
             ),
           ),
-          // Phone Mini
+
+          // ── Phone (right side) ──
           Positioned(
-            bottom: 5,
+            bottom: 10,
             right: 10,
             child: Container(
-              width: 36,
-              height: 60,
+              width: 44,
+              height: 72,
+              padding: const EdgeInsets.all(2),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0xFF2A2A3A), Color(0xFF1E1E2A)],
-                ),
-                borderRadius: BorderRadius.circular(7),
-                border: Border.all(color: AppColors.primary, width: 1.5),
-                boxShadow: const [
+                gradient: AppColors.brandGradient,
+                borderRadius: BorderRadius.circular(11),
+                boxShadow: [
                   BoxShadow(
-                    color: AppColors.primaryGlow,
-                    blurRadius: 12,
-                    spreadRadius: 2,
+                    color: AppColors.primary.withValues(alpha: 0.55),
+                    blurRadius: 18,
+                    spreadRadius: 1,
+                  ),
+                  BoxShadow(
+                    color: AppColors.accent.withValues(alpha: 0.3),
+                    blurRadius: 14,
+                    spreadRadius: -1,
                   ),
                 ],
               ),
-              alignment: Alignment.center,
               child: Container(
-                width: 26,
-                height: 38,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: AppColors.primary.withOpacity(0.4)),
+                  color: const Color(0xFF15102A),
+                  borderRadius: BorderRadius.circular(9),
                 ),
-                padding: const EdgeInsets.all(4),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Container(height: 1.5, color: AppColors.primaryDim.withOpacity(0.5)),
-                    Container(height: 1.5, color: AppColors.primaryDim.withOpacity(0.5)),
-                    Container(height: 1.5, color: AppColors.primaryDim.withOpacity(0.5)),
-                  ],
+                child: Padding(
+                  padding: const EdgeInsets.all(6),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Container(
+                        height: 2,
+                        decoration: BoxDecoration(
+                          gradient: AppColors.brandGradient,
+                          borderRadius: BorderRadius.circular(1),
+                        ),
+                      ),
+                      Container(
+                        height: 2,
+                        color: AppColors.primaryLight.withValues(alpha: 0.4),
+                      ),
+                      Container(
+                        height: 2,
+                        color: AppColors.primaryLight.withValues(alpha: 0.4),
+                      ),
+                      Container(
+                        height: 2,
+                        color: AppColors.primaryLight.withValues(alpha: 0.25),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-          // WiFi Arc (Mockup)
-          const Positioned(
-            top: 50,
-            child: Icon(Icons.wifi_tethering, color: AppColors.primaryLight, size: 24),
+
+          // ── Wi-Fi arc between them ──
+          Positioned(
+            top: 70,
+            child: ShaderMask(
+              shaderCallback: (rect) =>
+                  AppColors.brandGradient.createShader(rect),
+              blendMode: BlendMode.srcIn,
+              child: const Icon(
+                Icons.wifi_tethering,
+                color: Colors.white,
+                size: 28,
+              ),
+            ),
           ),
         ],
       ),

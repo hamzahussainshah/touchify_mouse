@@ -3,7 +3,11 @@ import '../../../shared/models/device_model.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
-class DeviceCard extends StatelessWidget {
+/// Card representing a discovered desktop on the LAN.
+/// Shows OS icon + name + IP, plus signal bars and a CONNECTED pill when
+/// active. Active state uses a gradient border + soft glow so it visually
+/// pops against the unconnected list.
+class DeviceCard extends StatefulWidget {
   final DeviceModel device;
   final bool isActive;
   final VoidCallback onTap;
@@ -16,107 +20,208 @@ class DeviceCard extends StatelessWidget {
   });
 
   @override
+  State<DeviceCard> createState() => _DeviceCardState();
+}
+
+class _DeviceCardState extends State<DeviceCard> {
+  bool _pressed = false;
+
+  void _set(bool v) {
+    if (_pressed == v) return;
+    setState(() => _pressed = v);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final colors = context.appColors;
+    final c = context.appColors;
+    final active = widget.isActive;
+
     return GestureDetector(
-      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (_) => _set(true),
+      onTapUp: (_) => _set(false),
+      onTapCancel: () => _set(false),
+      onTap: widget.onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOut,
+        transform: Matrix4.identity()
+          ..scaleByDouble(_pressed ? 0.985 : 1.0, _pressed ? 0.985 : 1.0, 1.0, 1.0),
+        transformAlignment: Alignment.center,
+        padding: EdgeInsets.all(active ? 1.5 : 0), // gradient border ring
         decoration: BoxDecoration(
-          color: isActive
-              ? AppColors.primary.withValues(alpha: 0.08)
-              : colors.surface2,
-          border: Border.all(
-            color: isActive
-                ? AppColors.primary.withValues(alpha: 0.4)
-                : colors.border,
-          ),
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: isActive
-                    ? AppColors.primary.withValues(alpha: 0.2)
-                    : colors.surface3,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                device.os.toLowerCase() == 'macos'
-                    ? Icons.apple
-                    : Icons.window,
-                color: isActive ? AppColors.primaryLight : colors.text1,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    device.name,
-                    style: AppTextStyles.deviceName.copyWith(
-                      color: isActive ? AppColors.primaryLight : colors.text1,
-                    ),
+          gradient: active ? AppColors.brandGradient : null,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: active
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.25),
+                    blurRadius: 20,
+                    spreadRadius: -4,
+                    offset: const Offset(0, 8),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '${device.os} • ${device.ipAddress}',
-                    style: AppTextStyles.deviceSub.copyWith(color: colors.text3),
+                ]
+              : null,
+        ),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            color: active ? c.surface1 : c.surface2,
+            border: active ? null : Border.all(color: c.border),
+            borderRadius: BorderRadius.circular(active ? 18.5 : 20),
+          ),
+          child: Row(
+            children: [
+              // OS icon tile
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  gradient: active ? AppColors.brandGradient : null,
+                  color: active ? null : c.surface3,
+                  borderRadius: BorderRadius.circular(13),
+                  boxShadow: active
+                      ? [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.4),
+                            blurRadius: 12,
+                            spreadRadius: -2,
+                          ),
+                        ]
+                      : null,
+                ),
+                child: Icon(
+                  widget.device.os.toLowerCase() == 'macos'
+                      ? Icons.apple
+                      : Icons.window,
+                  color: active ? Colors.white : c.text1,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.device.name,
+                      style: AppTextStyles.deviceName.copyWith(
+                        color: c.text1,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${widget.device.os} · ${widget.device.ipAddress}',
+                      style: AppTextStyles.deviceSub.copyWith(color: c.text3),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  if (active)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 9,
+                        vertical: 3,
+                      ),
+                      margin: const EdgeInsets.only(bottom: 8),
+                      decoration: BoxDecoration(
+                        color: AppColors.success.withValues(alpha: 0.16),
+                        border: Border.all(
+                          color: AppColors.success.withValues(alpha: 0.4),
+                        ),
+                        borderRadius: BorderRadius.circular(100),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: const [
+                          _Pulse(),
+                          SizedBox(width: 5),
+                          Text(
+                            'CONNECTED',
+                            style: TextStyle(
+                              color: AppColors.success,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.8,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: List.generate(4, (i) {
+                      final on = i < widget.device.signalStrength;
+                      return Container(
+                        width: 3,
+                        height: 4.0 + (i * 3),
+                        margin: const EdgeInsets.only(left: 2.5),
+                        decoration: BoxDecoration(
+                          color: on
+                              ? (active
+                                  ? AppColors.primaryLight
+                                  : AppColors.success)
+                              : c.border,
+                          borderRadius: BorderRadius.circular(1.5),
+                        ),
+                      );
+                    }),
                   ),
                 ],
               ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                if (isActive)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    margin: const EdgeInsets.only(bottom: 6),
-                    decoration: BoxDecoration(
-                      color: AppColors.success.withValues(alpha: 0.15),
-                      border: Border.all(
-                          color: AppColors.success.withValues(alpha: 0.3)),
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                    child: const Text(
-                      'CONNECTED',
-                      style: TextStyle(
-                        color: AppColors.success,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: List.generate(4, (index) {
-                    final isBarActive = index < device.signalStrength;
-                    return Container(
-                      width: 3,
-                      height: 4.0 + (index * 3),
-                      margin: const EdgeInsets.only(left: 2),
-                      decoration: BoxDecoration(
-                        color: isBarActive
-                            ? AppColors.success
-                            : AppColors.success.withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(1),
-                      ),
-                    );
-                  }),
-                ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
+    );
+  }
+}
+
+/// Tiny breathing dot used in the CONNECTED pill.
+class _Pulse extends StatefulWidget {
+  const _Pulse();
+  @override
+  State<_Pulse> createState() => _PulseState();
+}
+
+class _PulseState extends State<_Pulse>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c =
+      AnimationController(vsync: this, duration: const Duration(milliseconds: 1200))
+        ..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _c,
+      builder: (_, __) {
+        final t = _c.value;
+        return Container(
+          width: 6,
+          height: 6,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: AppColors.success,
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.success.withValues(alpha: 0.6 * t),
+                blurRadius: 4 + (4 * t),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

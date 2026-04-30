@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 
+import '../services/analytics_service.dart';
 import '../../features/onboarding/screens/welcome_screen.dart';
 import '../../features/onboarding/screens/setup_guide_screen.dart';
 import '../../features/connect/screens/connect_screen.dart';
@@ -16,6 +17,7 @@ class AppRouter {
   static final router = GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/welcome',
+    observers: [Analytics.observer],
     routes: [
       GoRoute(
         path: '/welcome',

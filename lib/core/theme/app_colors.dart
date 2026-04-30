@@ -1,32 +1,54 @@
 import 'package:flutter/material.dart';
 
-// ── Brand colours (same across all themes) ───────────────────────────────────
+// ── Brand colours (consistent across themes) ─────────────────────────────────
 class AppColors {
-  static const primary      = Color(0xFF6366F1);
-  static const primaryLight = Color(0xFF818CF8);
-  static const primaryDim   = Color(0xFFA5B4FC);
-  static const primaryBg    = Color(0xFF1E1B4B);
-  static const primaryGlow  = Color(0x596366F1);
+  // Primary brand: vibrant violet — more punchy than the old indigo.
+  static const primary       = Color(0xFF8B5CF6); // violet-500
+  static const primaryLight  = Color(0xFFA78BFA); // violet-400
+  static const primaryDim    = Color(0xFFC4B5FD); // violet-300
+  static const primaryDeep   = Color(0xFF6D28D9); // violet-700
+  static const primaryBg     = Color(0xFF1E1B4B);
+  static const primaryGlow   = Color(0x668B5CF6);
 
-  static const success = Color(0xFF34D399);
-  static const warning = Color(0xFFFBBF24);
-  static const danger  = Color(0xFFF87171);
+  // Accent: electric pink — for hero moments / pro CTAs / brand gradients.
+  static const accent        = Color(0xFFEC4899); // pink-500
+  static const accentLight   = Color(0xFFF472B6); // pink-400
 
-  // ── Dark / AMOLED (kept as const for backward-compat) ──────────────────
-  static const amoled    = Color(0xFF000000);
-  static const surface0  = Color(0xFF0A0A0C);
-  static const surface1  = Color(0xFF111114);
-  static const surface2  = Color(0xFF18181C);
-  static const surface3  = Color(0xFF222228);
-  static const surface4  = Color(0xFF2C2C35);
-  static const border    = Color(0x14FFFFFF);
-  static const borderMid = Color(0x1FFFFFFF);
-  static const text1     = Color(0xFFF8F8FF);
-  static const text2     = Color(0xFFB0B0C8);
-  static const text3     = Color(0xFF6B6B88);
+  // Highlight / trackpad ambient: cyan — gives "tech" feel on dark surfaces.
+  static const highlight     = Color(0xFF22D3EE); // cyan-400
+
+  // Status colours.
+  static const success       = Color(0xFF10B981); // emerald-500
+  static const warning       = Color(0xFFF59E0B); // amber-500
+  static const danger        = Color(0xFFEF4444); // red-500
+
+  // ── Brand gradients — use these for headlines & primary CTAs ──────────────
+  static const brandGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF8B5CF6), Color(0xFFEC4899)], // violet → pink
+  );
+  static const techGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0xFF8B5CF6), Color(0xFF22D3EE)], // violet → cyan
+  );
+
+  // ── Backwards-compat tokens (kept so nothing breaks) ──────────────────────
+  static const amoled    = Color(0xFF06030F);
+  static const surface0  = Color(0xFF0E0A1C);
+  static const surface1  = Color(0xFF15102A);
+  static const surface2  = Color(0xFF1B1632);
+  static const surface3  = Color(0xFF231D40);
+  static const surface4  = Color(0xFF2D2650);
+  static const border    = Color(0x1AFFFFFF);
+  static const borderMid = Color(0x29FFFFFF);
+  static const text1     = Color(0xFFF5F3FF);
+  static const text2     = Color(0xFFC4C2D8);
+  static const text3     = Color(0xFF7E7B9C);
 }
 
-// ── Per-theme colour tokens (accessed via context.appColors) ─────────────────
+// ── Per-theme colour tokens (accessed via `context.appColors`) ───────────────
 class AppColorScheme extends ThemeExtension<AppColorScheme> {
   final Color scaffold;
   final Color surface0, surface1, surface2, surface3, surface4;
@@ -41,49 +63,49 @@ class AppColorScheme extends ThemeExtension<AppColorScheme> {
     required this.text1,    required this.text2,    required this.text3,
   });
 
-  // AMOLED dark preset
+  // ── AMOLED — true-dark, deep plum tint (premium feel) ───────────────────
   static const amoled = AppColorScheme(
-    scaffold:  Color(0xFF000000),
-    surface0:  Color(0xFF0A0A0C),
-    surface1:  Color(0xFF111114),
-    surface2:  Color(0xFF18181C),
-    surface3:  Color(0xFF222228),
-    surface4:  Color(0xFF2C2C35),
-    border:    Color(0x14FFFFFF),
-    borderMid: Color(0x1FFFFFFF),
-    text1:     Color(0xFFF8F8FF),
-    text2:     Color(0xFFB0B0C8),
-    text3:     Color(0xFF6B6B88),
-  );
-
-  // Standard dark preset
-  static const dark = AppColorScheme(
-    scaffold:  Color(0xFF0F0F14),
-    surface0:  Color(0xFF141418),
-    surface1:  Color(0xFF1C1C22),
-    surface2:  Color(0xFF242430),
-    surface3:  Color(0xFF2E2E3C),
-    surface4:  Color(0xFF383848),
+    scaffold:  Color(0xFF06030F),
+    surface0:  Color(0xFF0E0A1C),
+    surface1:  Color(0xFF15102A),
+    surface2:  Color(0xFF1B1632),
+    surface3:  Color(0xFF231D40),
+    surface4:  Color(0xFF2D2650),
     border:    Color(0x1AFFFFFF),
-    borderMid: Color(0x26FFFFFF),
-    text1:     Color(0xFFF0F0FF),
-    text2:     Color(0xFFB0B0C8),
-    text3:     Color(0xFF6B6B88),
+    borderMid: Color(0x29FFFFFF),
+    text1:     Color(0xFFF5F3FF),
+    text2:     Color(0xFFC4C2D8),
+    text3:     Color(0xFF7E7B9C),
   );
 
-  // Light preset
+  // ── Standard dark — softer, warmer ─────────────────────────────────────
+  static const dark = AppColorScheme(
+    scaffold:  Color(0xFF0F0B1F),
+    surface0:  Color(0xFF161126),
+    surface1:  Color(0xFF1D1830),
+    surface2:  Color(0xFF26203D),
+    surface3:  Color(0xFF302849),
+    surface4:  Color(0xFF3A3157),
+    border:    Color(0x1FFFFFFF),
+    borderMid: Color(0x33FFFFFF),
+    text1:     Color(0xFFF5F3FF),
+    text2:     Color(0xFFC4C2D8),
+    text3:     Color(0xFF7E7B9C),
+  );
+
+  // ── Light — warm cream rather than cold gray ───────────────────────────
   static const light = AppColorScheme(
-    scaffold:  Color(0xFFF2F2F7),
-    surface0:  Color(0xFFF8F8FC),
+    scaffold:  Color(0xFFF7F5FB),
+    surface0:  Color(0xFFFFFFFF),
     surface1:  Color(0xFFFFFFFF),
-    surface2:  Color(0xFFF0F0F5),
-    surface3:  Color(0xFFE4E4EE),
-    surface4:  Color(0xFFD8D8E8),
+    surface2:  Color(0xFFF1ECF8),
+    surface3:  Color(0xFFE6DEF3),
+    surface4:  Color(0xFFD8CDED),
     border:    Color(0x14000000),
     borderMid: Color(0x1F000000),
-    text1:     Color(0xFF111122),
-    text2:     Color(0xFF4A4A65),
-    text3:     Color(0xFF8888A0),
+    text1:     Color(0xFF1B1232),
+    text2:     Color(0xFF534B6B),
+    text3:     Color(0xFF8B85A3),
   );
 
   @override
@@ -126,7 +148,6 @@ class AppColorScheme extends ThemeExtension<AppColorScheme> {
   }
 }
 
-/// Convenience accessor — use `context.appColors.surface1` anywhere.
 extension AppColorsExt on BuildContext {
   AppColorScheme get appColors =>
       Theme.of(this).extension<AppColorScheme>() ?? AppColorScheme.amoled;

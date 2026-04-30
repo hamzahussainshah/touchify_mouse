@@ -179,7 +179,7 @@ class _QrConnectSheetState extends ConsumerState<QrConnectSheet>
                   child: MobileScanner(
                     controller: _scannerController,
                     onDetect: _onQRDetected,
-                    errorBuilder: (context, error, child) {
+                    errorBuilder: (context, error) {
                       return Center(
                         child: Padding(
                           padding: const EdgeInsets.all(24),
@@ -207,34 +207,51 @@ class _QrConnectSheetState extends ConsumerState<QrConnectSheet>
                     },
                   ),
                 ),
-                // Viewfinder frame
+                // Viewfinder — see-through with thin violet stroke + glow.
+                // (Gradient is on the corner brackets, not on the whole frame,
+                // so the camera preview stays visible inside.)
                 IgnorePointer(
                   child: Container(
-                    width: 250,
-                    height: 250,
+                    width: 260,
+                    height: 260,
                     decoration: BoxDecoration(
-                      border:
-                          Border.all(color: AppColors.primary, width: 2.5),
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: AppColors.primaryLight.withValues(alpha: 0.45),
+                        width: 1.5,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.35),
+                          blurRadius: 28,
+                          spreadRadius: -4,
+                        ),
+                      ],
                     ),
                   ),
                 ),
-                // Corner accents for style
-                IgnorePointer(
-                  child: _CornerAccents(size: 250),
-                ),
+                // Bright gradient corner brackets — the real visual identity
+                IgnorePointer(child: _CornerAccents(size: 260)),
                 // Processing overlay
                 if (_isProcessing)
                   Container(
-                    width: 64,
-                    height: 64,
+                    width: 72,
+                    height: 72,
                     decoration: BoxDecoration(
-                      color: AppColors.surface1.withOpacity(0.9),
+                      color: AppColors.surface1.withValues(alpha: 0.92),
                       shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.4),
+                          blurRadius: 18,
+                        ),
+                      ],
                     ),
                     child: const Center(
                       child: CircularProgressIndicator(
-                          color: AppColors.primary, strokeWidth: 3),
+                        color: AppColors.primaryLight,
+                        strokeWidth: 3,
+                      ),
                     ),
                   ),
               ],
@@ -253,10 +270,23 @@ class _CornerAccents extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const len = 24.0;
-    const w = 3.0;
-    const color = AppColors.primary;
+    const len = 32.0;
+    const w = 4.0;
+    final color = AppColors.primaryLight;
+    final dec = BoxDecoration(
+      color: color,
+      borderRadius: BorderRadius.circular(2),
+      boxShadow: [
+        BoxShadow(
+          color: AppColors.primary.withValues(alpha: 0.6),
+          blurRadius: 8,
+          spreadRadius: -1,
+        ),
+      ],
+    );
 
+    Widget bar({required double w_, required double h}) =>
+        Container(width: w_, height: h, decoration: dec);
 
     return SizedBox(
       width: size,
@@ -264,25 +294,17 @@ class _CornerAccents extends StatelessWidget {
       child: Stack(
         children: [
           // Top-left
-          Positioned(top: 0, left: 0,
-            child: Container(width: len, height: w, color: color)),
-          Positioned(top: 0, left: 0,
-            child: Container(width: w, height: len, color: color)),
+          Positioned(top: -2, left: -2, child: bar(w_: len, h: w)),
+          Positioned(top: -2, left: -2, child: bar(w_: w, h: len)),
           // Top-right
-          Positioned(top: 0, right: 0,
-            child: Container(width: len, height: w, color: color)),
-          Positioned(top: 0, right: 0,
-            child: Container(width: w, height: len, color: color)),
+          Positioned(top: -2, right: -2, child: bar(w_: len, h: w)),
+          Positioned(top: -2, right: -2, child: bar(w_: w, h: len)),
           // Bottom-left
-          Positioned(bottom: 0, left: 0,
-            child: Container(width: len, height: w, color: color)),
-          Positioned(bottom: 0, left: 0,
-            child: Container(width: w, height: len, color: color)),
+          Positioned(bottom: -2, left: -2, child: bar(w_: len, h: w)),
+          Positioned(bottom: -2, left: -2, child: bar(w_: w, h: len)),
           // Bottom-right
-          Positioned(bottom: 0, right: 0,
-            child: Container(width: len, height: w, color: color)),
-          Positioned(bottom: 0, right: 0,
-            child: Container(width: w, height: len, color: color)),
+          Positioned(bottom: -2, right: -2, child: bar(w_: len, h: w)),
+          Positioned(bottom: -2, right: -2, child: bar(w_: w, h: len)),
         ],
       ),
     );

@@ -425,7 +425,6 @@ class _TrackpadSurfaceState extends ConsumerState<TrackpadSurface>
     final countBefore = _pointers.length;
     final wasScrolling = _scrollStarted;
     final twoFingerTotal = _twoFingerMoved;
-    final downPos = _downPos[e.pointer];
     final currPos = _pointers[e.pointer];
     final fingerTotal = _totalMove[e.pointer] ?? 0.0;
 
@@ -522,105 +521,195 @@ class _TrackpadSurfaceState extends ConsumerState<TrackpadSurface>
   // ── BUILD ─────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
-    return Listener(
-      behavior: HitTestBehavior.opaque,
-      onPointerDown: _onDown,
-      onPointerMove: _onMove,
-      onPointerUp: _onUp,
-      onPointerCancel: _onCancel,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: Stack(
-          children: [
-            // Background + grid
-            Container(
-              color: Colors.black,
-              child: CustomPaint(
-                painter: _GridPainter(),
-                child: const SizedBox.expand(),
+    final c = context.appColors;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Listener(
+        behavior: HitTestBehavior.opaque,
+        onPointerDown: _onDown,
+        onPointerMove: _onMove,
+        onPointerUp: _onUp,
+        onPointerCancel: _onCancel,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(color: c.borderMid, width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.12),
+                blurRadius: 32,
+                spreadRadius: -4,
+                offset: const Offset(0, 12),
               ),
-            ),
-            // Glow
-            Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: RadialGradient(
-                    center: const Alignment(-0.3, -0.3),
-                    radius: 0.8,
-                    colors: [
-                      AppColors.primary.withValues(alpha: 0.06),
-                      Colors.transparent,
-                    ],
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.4),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
+            ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(27),
+            child: Stack(
+              children: [
+                // Base — deep plum gradient (not pure black; gives warmth)
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          c.surface1,
+                          c.surface0,
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-            // Tap ripple
-            if (_ripplePos != null)
-              AnimatedBuilder(
-                animation: _ripple,
-                builder: (_, __) {
-                  final t = _ripple.value;
-                  return Positioned(
-                    left: _ripplePos!.dx - 30,
-                    top: _ripplePos!.dy - 30,
-                    child: Opacity(
-                      opacity: (1 - t).clamp(0.0, 1.0),
-                      child: Transform.scale(
-                        scale: 0.3 + t * 1.7,
-                        child: Container(
-                          width: 60,
-                          height: 60,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: AppColors.primaryDim.withValues(
-                                alpha: 0.5,
+                // Subtle dotted grid (less visual noise than line grid)
+                Positioned.fill(
+                  child: CustomPaint(painter: _DotGridPainter()),
+                ),
+                // Top-left violet glow
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: RadialGradient(
+                        center: const Alignment(-0.7, -0.8),
+                        radius: 1.0,
+                        colors: [
+                          AppColors.primary.withValues(alpha: 0.18),
+                          Colors.transparent,
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                // Bottom-right cyan/pink glow
+                Positioned.fill(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: RadialGradient(
+                        center: const Alignment(0.8, 0.9),
+                        radius: 1.0,
+                        colors: [
+                          AppColors.accent.withValues(alpha: 0.10),
+                          Colors.transparent,
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                // Inner highlight stroke (top-edge specular)
+                Positioned(
+                  top: 0,
+                  left: 16,
+                  right: 16,
+                  child: Container(
+                    height: 1,
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.transparent,
+                          Color(0x33FFFFFF),
+                          Colors.transparent,
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                // Tap ripple
+                if (_ripplePos != null)
+                  AnimatedBuilder(
+                    animation: _ripple,
+                    builder: (_, __) {
+                      final t = _ripple.value;
+                      return Positioned(
+                        left: _ripplePos!.dx - 40,
+                        top: _ripplePos!.dy - 40,
+                        child: IgnorePointer(
+                          child: Opacity(
+                            opacity: (1 - t).clamp(0.0, 1.0),
+                            child: Transform.scale(
+                              scale: 0.3 + t * 2.0,
+                              child: Container(
+                                width: 80,
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: RadialGradient(
+                                    colors: [
+                                      AppColors.primary.withValues(alpha: 0.35),
+                                      AppColors.primary.withValues(alpha: 0.0),
+                                    ],
+                                  ),
+                                  border: Border.all(
+                                    color: AppColors.primaryLight
+                                        .withValues(alpha: 0.6),
+                                    width: 1.5,
+                                  ),
+                                ),
                               ),
-                              width: 1.5,
                             ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                // Hint
+                Positioned(
+                  bottom: 14,
+                  left: 0,
+                  right: 0,
+                  child: IgnorePointer(
+                    child: Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.04),
+                          borderRadius: BorderRadius.circular(999),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.06),
+                          ),
+                        ),
+                        child: Text(
+                          'SLIDE · TAP · TWO-FINGER SCROLL',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 9,
+                            letterSpacing: 1.2,
+                            color: c.text3.withValues(alpha: 0.6),
+                            fontWeight: FontWeight.w700,
                           ),
                         ),
                       ),
                     ),
-                  );
-                },
-              ),
-            // Hint
-            Positioned(
-              bottom: 10,
-              left: 0,
-              right: 0,
-              child: Text(
-                'SLIDE · TAP · 2-FINGER SCROLL',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 9,
-                  letterSpacing: 0.1,
-                  color: Colors.white.withValues(alpha: 0.07),
-                  fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _GridPainter extends CustomPainter {
+/// Subtle dotted grid — way less visually noisy than full lines.
+class _DotGridPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (size.isEmpty) return;
-    final p = Paint()
-      ..color = Colors.white.withValues(alpha: 0.018)
-      ..strokeWidth = 0.5;
-    for (double x = 0; x < size.width; x += 32) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), p);
-    }
-    for (double y = 0; y < size.height; y += 32) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), p);
+    final p = Paint()..color = Colors.white.withValues(alpha: 0.05);
+    const step = 26.0;
+    for (double y = step; y < size.height; y += step) {
+      for (double x = step; x < size.width; x += step) {
+        canvas.drawCircle(Offset(x, y), 0.8, p);
+      }
     }
   }
 

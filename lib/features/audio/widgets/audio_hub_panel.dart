@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/providers/connection_state_provider.dart';
+import '../services/audio_coordinator.dart';
 import '../services/mic_stream_service.dart';
 import '../services/speaker_stream_service.dart';
 import '../../trackpad/services/trackpad_socket_service.dart';
@@ -20,6 +21,21 @@ class AudioHubPanel extends ConsumerWidget {
     // Fall back to the synchronous bool as an extra safety net.
     final isConnected = ref.watch(isSocketConnectedProvider).valueOrNull
         ?? TrackpadSocketService.instance.isConnected;
+    final coordinator = ref.read(audioCoordinatorProvider);
+
+    // Surface auto-off events as snackbars so the user understands why a
+    // toggle just flipped on its own.
+    ref.listen<AsyncValue<AudioAutoEvent>>(audioAutoEventProvider, (_, next) {
+      next.whenData((ev) {
+        final channel = ev.channel == 'mic' ? 'Microphone' : 'Speaker';
+        final msg = ev.reason == AutoOffReason.mutex
+            ? '$channel turned off — both can\'t run at once (feedback loop)'
+            : '$channel auto-off after 15 min of use';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(msg), duration: const Duration(seconds: 3)),
+        );
+      });
+    });
 
     return Container(
       decoration: BoxDecoration(
@@ -56,21 +72,19 @@ class AudioHubPanel extends ConsumerWidget {
                 _buildCard(
                   context: context,
                   title: 'Microphone',
-                  subtitle: isMicActive ? 'Streaming to desktop' : 'Ready',
+                  subtitle: isMicActive
+                      ? 'Streaming · auto-off in 15 min'
+                      : 'Ready',
                   icon: Icons.mic,
                   color: AppColors.primary,
                   isActive: isMicActive,
                   onToggle: (val) {
-                    if (val) {
-                      if (!isConnected) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Not connected to desktop — connect first')));
-                        return;
-                      }
-                      ref.read(micStreamProvider.notifier).startStreaming(null);
-                    } else {
-                      ref.read(micStreamProvider.notifier).stopStreaming();
+                    if (val && !isConnected) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Not connected to desktop — connect first')));
+                      return;
                     }
+                    coordinator.setMic(val);
                   },
                   onTapSettings: () => context.push('/microphone'),
                 ),
@@ -78,21 +92,19 @@ class AudioHubPanel extends ConsumerWidget {
                 _buildCard(
                   context: context,
                   title: 'Speaker',
-                  subtitle: isSpeakerActive ? 'Receiving from desktop' : 'Ready',
+                  subtitle: isSpeakerActive
+                      ? 'Receiving · auto-off in 15 min'
+                      : 'Ready',
                   icon: Icons.speaker,
                   color: AppColors.success,
                   isActive: isSpeakerActive,
                   onToggle: (val) {
-                    if (val) {
-                      if (!isConnected) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Not connected to desktop — connect first')));
-                        return;
-                      }
-                      ref.read(speakerStreamProvider.notifier).startReceiving(null);
-                    } else {
-                      ref.read(speakerStreamProvider.notifier).stopReceiving();
+                    if (val && !isConnected) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Not connected to desktop — connect first')));
+                      return;
                     }
+                    coordinator.setSpeaker(val);
                   },
                   onTapSettings: () => context.push('/speaker'),
                 ),

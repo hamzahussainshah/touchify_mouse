@@ -102,26 +102,36 @@ class _MediaRemotePanelState extends ConsumerState<MediaRemotePanel> {
                 size: 38,
                 onTap: () => _send({"type": "media", "action": "previous"}),
               ),
-              // Play / Pause — big
+              // Play / Pause — hero gradient circle
               GestureDetector(
                 onTap: () {
                   setState(() => _isPlaying = !_isPlaying);
                   _send({"type": "media", "action": "play_pause"});
                 },
                 child: Container(
-                  width: 68,
-                  height: 68,
+                  width: 76,
+                  height: 76,
                   decoration: BoxDecoration(
-                    color: AppColors.primary,
+                    gradient: AppColors.brandGradient,
                     shape: BoxShape.circle,
-                    boxShadow: const [
-                      BoxShadow(color: AppColors.primaryGlow, blurRadius: 16, spreadRadius: 3),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withValues(alpha: 0.5),
+                        blurRadius: 24,
+                        spreadRadius: 2,
+                        offset: const Offset(0, 8),
+                      ),
+                      BoxShadow(
+                        color: AppColors.accent.withValues(alpha: 0.25),
+                        blurRadius: 18,
+                        spreadRadius: -2,
+                      ),
                     ],
                   ),
                   child: Icon(
-                    _isPlaying ? Icons.pause : Icons.play_arrow,
+                    _isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
                     color: Colors.white,
-                    size: 38,
+                    size: 42,
                   ),
                 ),
               ),
