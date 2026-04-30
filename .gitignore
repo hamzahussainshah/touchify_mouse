@@ -43,3 +43,11 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Built desktop artifacts (use GitHub Releases instead of git)
+touchifymouse_desktop/dist/*.dmg
+touchifymouse_desktop/dist/*.zip
+touchifymouse_desktop/dist/*.exe
+
+# Firebase CLI local cache
+.firebase/
