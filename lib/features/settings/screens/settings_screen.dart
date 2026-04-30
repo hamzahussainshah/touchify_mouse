@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../shared/widgets/app_toggle.dart';
 import '../../../shared/widgets/home_indicator.dart';
 import '../../../core/providers/settings_provider.dart';
+import '../../auth/widgets/sign_in_card.dart';
 import '../../desktop_invite/widgets/get_desktop_sheet.dart';
 
 // Theme options shown in the picker
@@ -37,58 +39,90 @@ class SettingsScreen extends ConsumerWidget {
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
               children: [
-                // Pro Banner
+                const SignInCard(),
+                const SizedBox(height: 14),
+                // Pro Banner — brand gradient + glow
                 GestureDetector(
                   onTap: () => context.push('/pro'),
                   child: Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(18),
                     decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF818CF8), Color(0xFF6366F1), Color(0xFF4F46E5)],
-                      ),
-                      borderRadius: BorderRadius.circular(16),
+                      gradient: AppColors.brandGradient,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.4),
+                          blurRadius: 24,
+                          spreadRadius: -4,
+                          offset: const Offset(0, 10),
+                        ),
+                        BoxShadow(
+                          color: AppColors.accent.withValues(alpha: 0.25),
+                          blurRadius: 18,
+                          spreadRadius: -6,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
                     child: Row(
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: const BoxDecoration(
-                            color: Colors.white24,
-                            shape: BoxShape.circle,
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.22),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.3),
+                            ),
                           ),
-                          child: const Icon(Icons.workspace_premium, color: Colors.white, size: 24),
+                          child: const Icon(
+                            Icons.workspace_premium,
+                            color: Colors.white,
+                            size: 24,
+                          ),
                         ),
-                        const SizedBox(width: 16),
+                        const SizedBox(width: 14),
                         const Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Upgrade to TouchDesk Pro',
-                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                                'Upgrade to Pro',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w800,
+                                  fontSize: 17,
+                                  letterSpacing: -0.2,
+                                ),
                               ),
-                              SizedBox(height: 2),
+                              SizedBox(height: 3),
                               Text(
-                                'Unlock gyro mouse, custom workflows & more',
-                                style: TextStyle(color: Colors.white70, fontSize: 12),
+                                'Gyro mouse · Custom workflows · No ads',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  height: 1.3,
+                                ),
                               ),
                             ],
                           ),
                         ),
-                        const Icon(Icons.arrow_forward_ios, color: Colors.white54, size: 16),
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.18),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.arrow_forward_ios,
+                            color: Colors.white,
+                            size: 14,
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                ),
-                const SizedBox(height: 32),
-
-                // Account
-                Text('ACCOUNT', style: AppTextStyles.sectionLabel),
-                const SizedBox(height: 12),
-                _buildListTile(context,
-                  icon: Icons.g_mobiledata,
-                  title: 'Sign in with Google',
-                  onTap: () {},
                 ),
                 const SizedBox(height: 32),
 
@@ -233,8 +267,12 @@ class SettingsScreen extends ConsumerWidget {
                 Text('ABOUT', style: AppTextStyles.sectionLabel),
                 const SizedBox(height: 12),
                 _buildListTile(context, title: 'Version 1.0.0', onTap: null),
-                _buildListTile(context, title: 'Privacy Policy', onTap: () {}),
-                _buildListTile(context, title: 'Terms of Service', onTap: () {}),
+                _buildListTile(context,
+                    title: 'Privacy Policy',
+                    onTap: () => _openUrl('https://touchify-mouse.web.app/privacy.html')),
+                _buildListTile(context,
+                    title: 'Terms of Service',
+                    onTap: () => _openUrl('https://touchify-mouse.web.app/terms.html')),
                 const SizedBox(height: 40),
               ],
             ),
@@ -243,6 +281,13 @@ class SettingsScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _openUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 
   Widget _buildListTile(

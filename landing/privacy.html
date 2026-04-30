@@ -94,9 +94,9 @@
 <main>
   <h1>Privacy Policy</h1>
   <div class="meta">
-    <strong>Effective:</strong> 2026-04-25 ·
-    <strong>Last updated:</strong> 2026-04-25 ·
-    <strong>Contact:</strong> <a href="mailto:aitools.deventiatech@gmail.com">aitools.deventiatech@gmail.com</a>
+    <strong>Effective:</strong> 2026-04-30 ·
+    <strong>Last updated:</strong> 2026-04-30 ·
+    <strong>Contact:</strong> <a href="mailto:hamzahussainshaah@gmail.com">hamzahussainshaah@gmail.com</a>
   </div>
 
   <p>This Privacy Policy describes how the TouchifyMouse mobile app handles
@@ -107,8 +107,8 @@
 
   <h2>1. Summary</h2>
   <ul>
-    <li>We do <strong>not</strong> run our own servers and we do <strong>not</strong> collect any personal data on servers we control.</li>
-    <li>All trackpad input, keystrokes, audio, and pairing data flow <strong>directly</strong> between your phone and your own desktop computer over your local Wi-Fi network. None of it leaves your network.</li>
+    <li>Trackpad input, keystrokes, audio, and pairing data flow <strong>directly</strong> between your phone and your own desktop computer over your local Wi-Fi network. None of it touches our servers.</li>
+    <li>Sign-in is <strong>optional</strong>. You can use the entire app anonymously. If you choose to sign in with Google, we store a small profile and device record in Firebase (see Section 3).</li>
     <li>We do <strong>not</strong> sell, share, or transfer your personal information to third parties for their independent use.</li>
   </ul>
 
@@ -123,9 +123,29 @@
   <h3>Network</h3>
   <p>(<code>INTERNET</code>, <code>ACCESS_WIFI_STATE</code>, <code>ACCESS_NETWORK_STATE</code>, <code>CHANGE_WIFI_MULTICAST_STATE</code>) Used to discover and connect to the desktop companion on your local Wi-Fi via mDNS (Bonjour) and to maintain the TCP/UDP connection that carries trackpad, keyboard, media, and audio data. The internet permission is also required by Google AdMob and Google Play Billing.</p>
 
-  <h2>3. Information you provide voluntarily</h2>
-  <h3>Email address (optional)</h3>
-  <p>If you tap "Email me the desktop app link" inside the app, you may type an email address. That address is sent — only when you press send — through EmailJS, a third-party transactional email service, which delivers a one-off email containing the desktop download link. The address is not stored by us, not used for marketing, and not shared with anyone else. EmailJS's data handling is governed by their own privacy policy at <a href="https://www.emailjs.com/legal/privacy-policy/">https://www.emailjs.com/legal/privacy-policy/</a>.</p>
+  <h2>3. Account sign-in and Firebase</h2>
+  <p>Sign-in with Google is <strong>optional</strong>. The app is fully usable without an account. If you choose to sign in, the following is stored in Google Firebase (services we use as a data processor):</p>
+
+  <h3>Firebase Authentication</h3>
+  <p>When you sign in with Google, Firebase Authentication receives your Google account email, display name, profile photo URL, and a unique user ID assigned by Firebase. Firebase handles credential exchange — we never see or store your Google password.</p>
+
+  <h3>Cloud Firestore — what we store under your account</h3>
+  <p>If you are signed in, the app writes the following to a private document in Firestore keyed to your Firebase user ID:</p>
+  <ul>
+    <li><strong>Profile:</strong> email, display name, profile photo URL, sign-in provider, account creation timestamp, last-seen timestamp.</li>
+    <li><strong>Devices:</strong> for each phone or tablet you sign in on — platform (Android/iOS), OS version, device model and manufacturer, app version, build number, a vendor-supplied non-resettable device identifier (Android <code>ANDROID_ID</code> or iOS <code>identifierForVendor</code>), and first/last seen timestamps. This is used to help you recognise which device is which in future "your devices" features.</li>
+    <li><strong>Connection log:</strong> when your phone successfully pairs with your desktop, we record the desktop's name, operating system, local IP address, port, and the connection timestamp. This is used to power features like "recent connections" on signed-in accounts.</li>
+  </ul>
+  <p>Read access to this data is restricted by Firebase Security Rules so that only your own signed-in account can read your own data. We do not have a public dashboard exposing this information.</p>
+
+  <h3>Firebase Crashlytics</h3>
+  <p>Crashlytics records anonymous crash reports (stack traces, OS version, device model, app version) to help us fix bugs. Reports are not linked to your email or sign-in identity. Crashlytics is disabled in debug builds.</p>
+
+  <h3>Firebase Analytics</h3>
+  <p>We collect basic, anonymous usage events (e.g. "app opened", "feature used") to understand which parts of the app people use. Analytics events are not linked to your email or sign-in identity.</p>
+
+  <h3>How to delete your Firebase data</h3>
+  <p>To delete your sign-in profile, device records, and connection log: email <a href="mailto:hamzahussainshaah@gmail.com">hamzahussainshaah@gmail.com</a> from the Google account you signed in with, and we will delete your <code>users/{your-uid}</code> document and all subcollections within 30 days. You can also revoke the app's access to your Google account at <a href="https://myaccount.google.com/permissions">https://myaccount.google.com/permissions</a>.</p>
 
   <h2>4. Third-party services</h2>
 
@@ -141,12 +161,12 @@
 
   <h2>5. Data we do NOT collect</h2>
   <ul>
-    <li>Your name, phone number, or address.</li>
-    <li>Account credentials.</li>
+    <li>Your phone number or postal address.</li>
+    <li>Your Google password (Firebase handles authentication; we never see it).</li>
     <li>Photos, videos, contacts, calendar, files, or SMS.</li>
     <li>Precise GPS location.</li>
     <li>Health, biometric, or financial information.</li>
-    <li>Crash logs, telemetry, or analytics on servers we control.</li>
+    <li>The content of your trackpad gestures, keystrokes, microphone audio, or media commands — these flow only between your phone and your own desktop on your local Wi-Fi.</li>
   </ul>
 
   <h2>6. Data on your device</h2>
@@ -156,10 +176,11 @@
   <p>The app is not directed to children under 13 (or the equivalent minimum age in your jurisdiction). We do not knowingly collect personal information from children. If you believe a child has provided personal information, contact us and we will take steps to address it.</p>
 
   <h2>8. Security</h2>
-  <p>Connections to your desktop companion happen over your own local Wi-Fi network. We recommend you use a trusted, password-protected Wi-Fi network. We do not use TLS for the local connection because the data never leaves the LAN; please ensure your home/office Wi-Fi is properly secured.</p>
+  <p>Connections to your desktop companion happen over your own local Wi-Fi network. We recommend you use a trusted, password-protected Wi-Fi network. We do not use TLS for the local connection because the data never leaves the LAN; please ensure your home/office Wi-Fi is properly secured. Sign-in tokens and Firestore traffic to Firebase are encrypted in transit (HTTPS) by the Firebase SDK.</p>
 
   <h2>9. Your rights</h2>
-  <p>Because we do not collect personal data on our servers, there is nothing for us to access, export, or delete on your behalf. To control AdMob and Google Play data, use your Android device settings and your Google account controls (<a href="https://myaccount.google.com">https://myaccount.google.com</a>).</p>
+  <p>If you have signed in with Google, you can request access to, export, or deletion of your stored Firebase data (profile, device records, connection log) by emailing <a href="mailto:hamzahussainshaah@gmail.com">hamzahussainshaah@gmail.com</a> from the Google account you signed in with. We will respond within 30 days.</p>
+  <p>To control AdMob and Google Play data, use your Android device settings and your Google account controls (<a href="https://myaccount.google.com">https://myaccount.google.com</a>).</p>
   <p>To delete all app data on your device, go to <strong>Settings → Apps → TouchifyMouse → Storage → Clear Data</strong>, or simply uninstall the app.</p>
 
   <h2>10. Changes to this policy</h2>
@@ -167,13 +188,14 @@
 
   <h2>11. Contact</h2>
   <p>For questions or concerns about this Privacy Policy or how the app handles data:<br/>
-  <strong>Email:</strong> <a href="mailto:aitools.deventiatech@gmail.com">aitools.deventiatech@gmail.com</a></p>
+  <strong>Email:</strong> <a href="mailto:hamzahussainshaah@gmail.com">hamzahussainshaah@gmail.com</a></p>
 </main>
 
 <footer>
   © <span id="year"></span> TouchifyMouse
   · <a href="index.html">Home</a>
-  · <a href="mailto:aitools.deventiatech@gmail.com">Contact</a>
+  · <a href="terms.html">Terms</a>
+  · <a href="mailto:hamzahussainshaah@gmail.com">Contact</a>
 </footer>
 
 <script>document.getElementById('year').textContent = new Date().getFullYear();</script>

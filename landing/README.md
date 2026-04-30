@@ -17,7 +17,7 @@ Search the two HTML files for `CHANGE_ME` and replace with your real values:
 | Placeholder | Replace with |
 |---|---|
 | `CHANGE_ME/touchifymouse-desktop` | `<your-github-user>/<your-desktop-repo>` |
-| `aitools.deventiatech@gmail.com` | Your contact email (already set, change if needed) |
+| `hamzahussainshaah@gmail.com` | Your contact email (already set, change if needed) |
 | `com.touchify_mouse` | Your Play Store package name (already set) |
 
 If you publish a separate App Store version later, update the iOS link in the
