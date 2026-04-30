@@ -39,6 +39,10 @@ jobs:
 
       # Stage the unpacked release dir under a stable name so the zip's
       # internal folder is `TouchifyMouse/`, not `Release/`.
+      # Also bundle the VC++ runtime DLLs (vcruntime140*.dll, msvcp140.dll)
+      # so users don't need to install the Microsoft Visual C++ Redistributable
+      # before launching the app. Microsoft permits app-local deployment of
+      # these redistributable files.
       - name: Stage build
         shell: pwsh
         run: |
@@ -46,6 +50,22 @@ jobs:
           New-Item -ItemType Directory -Force -Path $stage | Out-Null
           Copy-Item -Path "build\windows\x64\runner\Release\*" `
                     -Destination $stage -Recurse -Force
+
+          # Bundle MSVC runtime DLLs from the runner's System32. The Flutter
+          # Windows release build links against vcruntime140 + vcruntime140_1
+          # + msvcp140. Without these, the .exe fails to start on machines
+          # that don't already have the VC++ 2015-2022 Redistributable.
+          $sys = "$env:SystemRoot\System32"
+          foreach ($dll in @("vcruntime140.dll","vcruntime140_1.dll","msvcp140.dll")) {
+            $src = Join-Path $sys $dll
+            if (Test-Path $src) {
+              Copy-Item $src $stage -Force
+              Write-Host "  bundled $dll"
+            } else {
+              Write-Warning "  $dll not found in $sys — skipping"
+            }
+          }
+          Get-ChildItem $stage -Filter "*.dll" | Select-Object Name, Length
 
       - name: Zip portable build
         shell: pwsh
